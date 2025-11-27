@@ -10,4 +10,5 @@ class OutfitRecommender(Protocol):
         wardrobe: List[ClothingItem],
     ) -> List[ClothingItem]:
         """Вернуть список вещей, которые должны войти в аутфит."""
-        return []
+        items: List[ClothingItem] = []
+        return items
