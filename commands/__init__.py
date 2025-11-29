@@ -1,0 +1,4 @@
+# flake8: noqa
+from manage_user_preferences import ManageUserPreferencesResult, ManageUserPreferences
+from manage_wardrobe import ManageWardrobeResult, ManageWardrobe
+from season_mailing import SeasonMailResult, SeasonMailing

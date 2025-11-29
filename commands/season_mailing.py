@@ -34,7 +34,6 @@ class SeasonMailing:
             if user.last_season_notified == current_season:
                 continue
 
-            # Добавляем задачу на отправку
             results.append(
                 SeasonMailResult(
                     user_id=user.id,
@@ -45,5 +44,3 @@ class SeasonMailing:
             # Обновляем пользователя: помечаем, что ему этот сезон уже отослали
             user.last_season_notified = current_season
             self._user_repo.update(user)
-
-        pass

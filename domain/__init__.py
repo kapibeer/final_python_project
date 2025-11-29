@@ -8,5 +8,6 @@ from .models.weather_snap import WeatherSnap
 from .services.outfit_builder import OutfitBuilder
 from .services.outfit_recommender import OutfitRecommender
 from .services.take_with_builder import TakeWithBuilder
-from .services.user_repository import UserRepository
-from .services.wardrobe_repository import WardrobeRepository
+from .repositories.user_repository import UserRepository
+from .repositories.wardrobe_repository import WardrobeRepository
+from .repositories.weather_repository import WeatherRepository
