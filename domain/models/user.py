@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass
@@ -8,8 +9,7 @@ class User:
     gender: str
     age: int
     location: str
-    style: str
-    cold_sensitivity: str    # "high" / "normal" / "low"
-
+    cold_sensitivity: str
     notification_time: str   # "08:00"
     notifications_enabled: bool = True
+    taste_embedding: List[float]

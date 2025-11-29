@@ -1,13 +1,12 @@
 from enum import StrEnum
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 
 
 class ClothingCategory(StrEnum):
     OUTERWEAR = "outerwear"
     TOP = "top"
     BOTTOM = "bottom"
-    FOOTWEAR = "footwear"
 
 
 class ClothingSubtype(StrEnum):
@@ -23,11 +22,6 @@ class ClothingSubtype(StrEnum):
 
     COAT = "coat"
     JACKET = "jacket"
-
-    SNEAKERS = "sneakers"
-    SHOES = "shoes"
-    BOOTS = "boots"
-
     OTHER = "other"
 
 
@@ -89,3 +83,5 @@ class ClothingItem:
     is_waterproof: bool
     is_windproof: bool
     has_hood: bool
+
+    embedding: List[float]
