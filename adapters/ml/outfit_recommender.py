@@ -1,7 +1,6 @@
 # adapters/ml/FakeMLOutfitRecommender.py
 from typing import List
-from domain.models import User, WeatherSnap, ClothingItem
-from domain.services import OutfitRecommender
+from domain import User, WeatherSnap, ClothingItem, OutfitRecommender
 
 
 class MLOutfitRecommender(OutfitRecommender):

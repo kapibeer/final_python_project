@@ -1,4 +1,4 @@
-from domain.services import UserRepository
+from domain import UserRepository
 
 
 class DBUserRepository(UserRepository):

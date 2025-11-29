@@ -1,6 +1,6 @@
 # domain/services/OutfitBuilder.py
 from typing import List
-from domain.models import User, WeatherSnap, ClothingItem, Outfit
+from domain import User, WeatherSnap, ClothingItem, Outfit
 from domain import OutfitRecommender
 
 

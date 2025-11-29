@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import date
 
 
 @dataclass
@@ -11,7 +12,7 @@ class TemperaturePeriod:
 @dataclass
 class WeatherSnap:
     location: str
-    date: str
+    date: date
 
     temperatures: TemperaturePeriod
 

@@ -1,4 +1,4 @@
-from domain.services import WardrobeRepository
+from domain import WardrobeRepository
 
 
 class DBWardrobeRepository(WardrobeRepository):

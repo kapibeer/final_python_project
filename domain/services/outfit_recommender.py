@@ -1,5 +1,5 @@
 from typing import Protocol, List
-from domain.models import User, WeatherSnap, ClothingItem
+from domain import User, WeatherSnap, ClothingItem
 
 
 class OutfitRecommender(Protocol):
