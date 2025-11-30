@@ -2,3 +2,5 @@
 from manage_user_preferences import ManageUserPreferencesResult, ManageUserPreferences
 from manage_wardrobe import ManageWardrobeResult, ManageWardrobe
 from season_mailing import SeasonMailResult, SeasonMailing
+from daily_recommendation import DailyRecommendationResult, DailyRecommendation
+from build_outfit import BuildOutfitResult, BuildOutfit

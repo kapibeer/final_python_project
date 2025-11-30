@@ -1,13 +1,13 @@
-# domain/services/OutfitBuilder.py
-from typing import List
-from domain import User, WeatherSnap, ClothingItem, Outfit
+from typing import List, Optional
+from domain import User, WeatherSnap, ClothingItem, Outfit, Style
 from domain import OutfitRecommender
 
 
 class OutfitBuilder:
     """
-    Доменный сервис: собирает аутфит, пользуясь абстрактным рекомендателем.
-    Сейчас в проект будет подставлена заглушка, позже — настоящая ML-модель.
+    Доменный сервис: собирает аутфиты, пользуясь рекомендателем.
+    Рекомендатель возвращает списки вещей,
+    а Builder превращает их в полноценные доменные объекты Outfit.
     """
 
     def __init__(self, recommender: OutfitRecommender):
@@ -16,10 +16,23 @@ class OutfitBuilder:
     def build(
         self,
         user: User,
-        weather: WeatherSnap,
         wardrobe: List[ClothingItem],
-    ) -> Outfit:
-        items = self._recommender.recommend(user, weather, wardrobe)
-        return Outfit(
-            items=items
+        weather: WeatherSnap,
+        style: Optional[Style] = None,
+        count_max: int = 1
+    ) -> List[Outfit]:
+
+        recommended_sets = self._recommender.recommend(
+            user=user,
+            wardrobe=wardrobe,
+            weather=weather,
+            style=style,
+            count_max=count_max
         )
+
+        outfits: List[Outfit] = [
+            Outfit(items=items)
+            for items in recommended_sets
+        ]
+
+        return outfits

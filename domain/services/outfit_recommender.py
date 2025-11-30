@@ -1,14 +1,17 @@
-from typing import Protocol, List
-from domain import User, WeatherSnap, ClothingItem
+from typing import Protocol, List, Optional
+from domain import User, WeatherSnap, ClothingItem, Style
 
 
 class OutfitRecommender(Protocol):
     def recommend(
         self,
         user: User,
-        weather: WeatherSnap,
         wardrobe: List[ClothingItem],
-    ) -> List[ClothingItem]:
-        """Вернуть список вещей, которые должны войти в аутфит."""
-        items: List[ClothingItem] = []
-        return items
+        weather: WeatherSnap,
+        style: Optional[Style] = None,
+        count_max: int = 1
+    ) -> List[List[ClothingItem]]:
+        """Вернуть списки вещей, которые
+        должны войти в топ count_max аутфитов."""
+        recommended_sets: List[List[ClothingItem]] = []
+        return recommended_sets
