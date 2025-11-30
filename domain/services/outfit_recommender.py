@@ -13,5 +13,4 @@ class OutfitRecommender(Protocol):
     ) -> List[List[ClothingItem]]:
         """Вернуть списки вещей, которые
         должны войти в топ count_max аутфитов."""
-        recommended_sets: List[List[ClothingItem]] = []
-        return recommended_sets
+        ...

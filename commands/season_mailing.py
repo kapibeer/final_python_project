@@ -44,3 +44,4 @@ class SeasonMailing:
             # Обновляем пользователя: помечаем, что ему этот сезон уже отослали
             user.last_season_notified = current_season
             self._user_repo.update(user)
+        return results
