@@ -1,9 +1,9 @@
 from enum import StrEnum
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import Optional
 
 
-class ClothingCategory(StrEnum):
+class ClothingType(StrEnum):
     OUTERWEAR = "outerwear"
     TOP = "top"
     BOTTOM = "bottom"
@@ -58,19 +58,13 @@ class WarmthLevel(StrEnum):
     VERY_WARM = "very_warm"
 
 
-class Length(StrEnum):
-    SHORT = "short"
-    MEDIUM = "medium"
-    LONG = "long"
-
-
 @dataclass
 class ClothingItem:
     item_id: int
     owner_id: int
     image_id: str
 
-    category: ClothingCategory
+    type: ClothingType
     subtype: ClothingSubtype
 
     main_color: Color
@@ -78,10 +72,7 @@ class ClothingItem:
 
     style: Style
     warmth_level: WarmthLevel
-    length: Length
 
     is_waterproof: bool
     is_windproof: bool
     has_hood: bool
-
-    embedding: List[float]

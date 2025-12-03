@@ -1,6 +1,13 @@
+from enum import StrEnum
 from dataclasses import dataclass
-from typing import List
-from domain import Season
+from domain import Season, Style
+from datetime import time
+
+
+class ColdSensitivity(StrEnum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
 
 
 @dataclass
@@ -10,9 +17,9 @@ class User:
     gender: str
     age: int
     location: str
-    cold_sensitivity: str
-    notification_time: str   # "08:00"
+    cold_sensitivity: ColdSensitivity
+    notification_time: time
     notifications_enabled: bool = True
     season_notifications_enabled: bool = True
     last_season_notifiied: Season
-    taste_embedding: List[float]
+    favourite_style: Style
