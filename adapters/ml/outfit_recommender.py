@@ -1,6 +1,6 @@
-# adapters/ml/FakeMLOutfitRecommender.py
 from typing import List
-from domain import User, WeatherSnap, ClothingItem, OutfitRecommender
+from domain import User, WeatherSnap
+from domain import ClothingItem, OutfitRecommender
 
 
 class MLOutfitRecommender(OutfitRecommender):
@@ -15,5 +15,4 @@ class MLOutfitRecommender(OutfitRecommender):
         wardrobe: List[ClothingItem],
     ) -> List[ClothingItem]:
         items: List[ClothingItem] = []
-
         return items

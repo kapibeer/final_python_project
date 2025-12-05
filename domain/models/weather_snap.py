@@ -12,7 +12,7 @@ class TemperaturePeriod:
 @dataclass
 class WeatherSnap:
     location: str
-    date: date
+    today: date
 
     temperatures: TemperaturePeriod
 

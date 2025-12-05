@@ -47,7 +47,6 @@ class Style(StrEnum):
     STREET = "street"
     BUSINESS = "business"
     PARTY = "party"
-    HOME = "home"
     OUTDOOR = "outdoor"
 
 

@@ -8,6 +8,7 @@ from .models.weather_snap import WeatherSnap
 from .services.outfit_builder import OutfitBuilder
 from .services.outfit_recommender import OutfitRecommender
 from .services.take_with_builder import TakeWithBuilder
+from .services.weather_classifier import classify_weather
 from .services.detect_season import detect_season
 from .repositories.user_repository import UserRepository
 from .repositories.wardrobe_repository import WardrobeRepository
