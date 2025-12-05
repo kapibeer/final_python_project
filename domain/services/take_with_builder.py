@@ -15,9 +15,9 @@ class TakeWithBuilder:
             self._apply_evening_cooling_rules
         ]
     
-    def _get_season(self, date: datetime) -> str:
+    def _get_season(self, today: date) -> str:
         """Определяем сезон по дате"""
-        month = date.month
+        month = today.month
         
         if month in [12, 1, 2]:
             return "winter"
@@ -39,7 +39,7 @@ class TakeWithBuilder:
     
     def _apply_sunny_hot_rules(self, weather: WeatherSnap, rec: TakeWith):
         """Правила для солнечной/жаркой погоды"""
-        if weather.is_sunny or weather.temperatures.day >= 25:
+        if weather.is_sunny and weather.temperatures.day >= 20:
             rec.add("головной убор")
             rec.add("солнцезащитные очки")
             if weather.is_uv_high:
@@ -63,9 +63,9 @@ class TakeWithBuilder:
         """Правила для холодной погоды"""
         temps = weather.temperatures
         is_cold = any([
-            temps.morning < 10,
-            temps.day < 10,
-            temps.evening < 10
+            temps.morning < 4,
+            temps.day < 7,
+            temps.evening < 3
         ])
         
         if is_cold:
@@ -94,15 +94,12 @@ class TakeWithBuilder:
             day_temp = weather.temperatures.day
             evening_temp = weather.temperatures.evening
             temperature_diff = day_temp - evening_temp
-            
-            if season == "spring" and temperature_diff >= 8:
-                rec.add("легкая куртка/кофта")
-                rec.add("шарф")
-            
-            elif season == "summer" and temperature_diff >= 10:
-                rec.add("легкая кофта/толстовка")
-            
-            elif season == "autumn" and temperature_diff >= 7:
-                rec.add("теплый свитер/кофта/куртка")
-                rec.add("шапка")
-                rec.add("перчатки")
+            if season == "spring":
+                if day_temp >= 15 and temperature_diff >= 8:
+                    rec.add("легкая куртка")
+            elif season == "summer":
+                if day_temp >= 20 and temperature_diff >= 10:
+                    rec.add("легкая кофта")
+            elif season == "autumn":
+                if day_temp >= 15 and temperature_diff >= 7:
+                    rec.add("куртка")

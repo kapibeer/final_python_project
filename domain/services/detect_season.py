@@ -1,5 +1,5 @@
 from domain import Season, WeatherSnap
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Optional
 
 
@@ -23,6 +23,9 @@ class SeasonChangeDetector:
         """
         try:
             current_date = weather.today
+            if self._is_season_start_today(current_date):
+                start_season = self._get_season_by_date(current_date)
+                return start_season
             for season in Season:
                 if self._should_notify_about_season(current_date, weather, season):
                     return season
@@ -33,19 +36,48 @@ class SeasonChangeDetector:
             print(f"Error checking season change: {e}")
             return None
     
-    def _should_notify_about_season(self, current_date: datetime, weather: WeatherSnap, target_season: Season) -> bool:
+    def _is_season_start_today(self, today: date) -> bool:
+        """
+        Проверяет, является ли сегодня 1-м числом начала какого-либо сезона.
+        """
+        month, day = today.month, today.day
+        for season, (start_month, start_day) in self.season_starts.items():
+            if month == start_month and day == start_day:
+                return True
+        
+        return False
+    
+    def _get_season_by_date(self, date: date) -> Season:
+        """
+        Определяет сезон по дате.
+        """
+        month = date.month
+        
+        if month in [12, 1, 2]:
+            return Season.WINTER
+        elif month in [3, 4, 5]:
+            return Season.SPRING
+        elif month in [6, 7, 8]:
+            return Season.SUMMER
+        else:
+            return Season.AUTUMN
+    
+    def _should_notify_about_season(self, today: date, weather: WeatherSnap, target_season: Season) -> bool:
         """
         Проверяет, нужно ли уведомлять о конкретном сезоне.
         """
         month_start, day_start = self.season_starts[target_season]
-        year = current_date.year
-        season_start = datetime(year, month_start, day_start)
-        if target_season == Season.SPRING and current_date.month == 12:
-            season_start = datetime(year + 1, month_start, day_start)
-        four_weeks_before = season_start - timedelta(days=28)
+        year = today.year
+        season_start = date(year, month_start, day_start)
+        
+        if target_season == Season.SPRING and today.month == 12:
+            season_start = date(year + 1, month_start, day_start)
+        three_weeks_before = season_start - timedelta(days=21)
         one_week_before = season_start - timedelta(days=7)
-        if not (four_weeks_before <= current_date <= one_week_before):
+        
+        if not (three_weeks_before <= today <= one_week_before):
             return False
+        
         return self._has_season_signs(weather, target_season)
     
     def _has_season_signs(self, weather: WeatherSnap, season: Season) -> bool:
