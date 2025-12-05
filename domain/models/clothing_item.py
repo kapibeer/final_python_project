@@ -3,26 +3,10 @@ from dataclasses import dataclass
 from typing import Optional
 
 
-class ClothingType(StrEnum):
+class ClothingCategory(StrEnum):
     OUTERWEAR = "outerwear"
     TOP = "top"
     BOTTOM = "bottom"
-
-
-class ClothingSubtype(StrEnum):
-    HOODIE = "hoodie"
-    SWEATSHIRT = "sweatshirt"
-    BLAZER = "blazer"
-    SHIRT = "shirt"
-    TSHIRT = "tshirt"
-
-    JEANS = "jeans"
-    TROUSERS = "trousers"
-    SWEATPANTS = "sweatpants"
-
-    COAT = "coat"
-    JACKET = "jacket"
-    OTHER = "other"
 
 
 class Color(StrEnum):
@@ -32,7 +16,6 @@ class Color(StrEnum):
     BEIGE = "beige"
     BROWN = "brown"
     BLUE = "blue"
-    NAVY = "navy"
     GREEN = "green"
     RED = "red"
     YELLOW = "yellow"
@@ -43,18 +26,64 @@ class Color(StrEnum):
 class Style(StrEnum):
     CASUAL = "casual"
     SPORT = "sport"
-    CLASSIC = "classic"
-    STREET = "street"
-    BUSINESS = "business"
-    PARTY = "party"
-    OUTDOOR = "outdoor"
+    OFFICIAL = "official"
+    EVENING = "evening" 
 
 
 class WarmthLevel(StrEnum):
     LIGHT = "light"
-    MID = "mid"
+    MEDIUM = "medium"
     WARM = "warm"
-    VERY_WARM = "very_warm"
+
+
+class OuterwearGroup(StrEnum):
+    WINTER_OUTERWEAR = "winter_outerwear"
+    DEMI_SEASON_OUTERWEAR = "demi_season_outerwear"
+    LIGHT_OUTERWEAR = "light_outerwear"
+
+
+class TopGroup(StrEnum):
+    ONEPIECE_CLOTH = "onepiece_cloth"
+    LAYERED_TOPS = "layered_tops"
+    TRANSFORMABLE_TOPS = "transformable_tops"
+    BASE_TOPS = "base_tops"
+    KNITWEAR = "knitwear"
+
+
+class BottomGroup(StrEnum):
+    FULL_LENGTH_BOTTOMS = "full_length_bottoms"
+    MID_LENGTH_BOTTOMS = "mid_length_bottoms"
+    SHORT_LENGTH_BOTTOMS = "short_length_bottoms"
+
+
+class ClothingSubtype(StrEnum):
+    # Tops
+    DRESS = "dress"
+    ROMPER = "romper"
+    JACKET = "jacket"
+    ZIP-UP_HOODIE = "zip-up_hoodie"
+    CARDIGAN = "cardigan"
+    SHIRT = "shirt"
+    TSHIRT = "tshirt"
+    VEST = "vest"
+    HOODIE = "hoodie"
+    LONGSLEEVE = 'longsleeve'
+    SWEATER = "sweater"
+
+    # Bottoms
+    JEANS = "jeans"
+    TROUSERS = "trousers"
+    SWEATPANTS = "sweatpants"
+    SHORTS = "shorts"
+    SKIRT = "skirt"
+    CAPRIS = "capris"
+
+    # Outerwear
+    COAT = "coat"
+    JACKET = "jacket"
+    BOMBER = "bomber"
+    TRENCH = "trench"
+    PUFFER = "puffer"
 
 
 @dataclass
@@ -63,15 +92,26 @@ class ClothingItem:
     owner_id: int
     image_id: str
 
-    type: ClothingType
-    subtype: ClothingSubtype
-
     main_color: Color
-    secondary_color: Optional[Color]
 
-    style: Style
-    warmth_level: WarmthLevel
+    style: Style = Style.CASUAL
+    warmth_level: WarmthLevel = WarmthLevel.MEDIUM
 
-    is_waterproof: bool
-    is_windproof: bool
-    has_hood: bool
+    subtype: ClothingSubtype = ClothingSubtype.TSHIRT
+
+
+@dataclass
+class Outerwear(ClothingItem):
+    group: OuterwearGroup = OuterwearGroup.LIGHT_OUTERWEAR
+    is_waterproof: bool = False
+    is_windproof: bool = False
+
+
+@dataclass
+class Top(ClothingItem):
+    group: TopGroup = TopGroup.BASE_TOPS
+
+
+@dataclass
+class Bottom(ClothingItem):
+    group: BottomGroup = BottomGroup.FULL_LENGTH_BOTTOMS
