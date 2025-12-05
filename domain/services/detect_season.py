@@ -4,6 +4,10 @@ from typing import Optional
 
 
 class SeasonChangeDetector:
+    """
+    Отслеживает момент для отправки уведомлений о смене сезона.
+    """
+    
     def __init__(self):
         self.season_starts = {
             Season.SPRING: (3, 1),
@@ -18,7 +22,7 @@ class SeasonChangeDetector:
         Возвращает следующий сезон, если пора, иначе None.
         """
         try:
-            current_date = weather.date
+            current_date = weather.today
             for season in Season:
                 if self._should_notify_about_season(current_date, weather, season):
                     return season
@@ -46,9 +50,10 @@ class SeasonChangeDetector:
     
     def _has_season_signs(self, weather: WeatherSnap, season: Season) -> bool:
         """
-        признаки приближающегося сезона.
+        Проверяет, есть ли признаки приближающегося сезона.
         """
         temps = weather.temperatures
+        
         if season == Season.SPRING:
             signs = [
                 temps.day >= 0,
