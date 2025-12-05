@@ -31,7 +31,7 @@ class OutfitImageRenderer:
     def render_from_images(
         self,
         images: List[Image.Image],
-        canvas_size: tuple[int, int] = (800, 800),
+        canvas_size: tuple[int, int] = (1000, 1000),
         bg_color: str | tuple[int, int, int] = "white",
     ) -> Image.Image:
         """
@@ -39,6 +39,14 @@ class OutfitImageRenderer:
 
         Использование:
             img = renderer.render_from_images([img1, img2, img3])
+        """
+        width, height = 800, 800
+        canvas = Image.new("RGB", (width, height), color="white")
+        return canvas
+
+    def delete_background(self, image: Image.Image) -> Image.Image:
+        """
+        Удалить фон с картинки
         """
         width, height = 800, 800
         canvas = Image.new("RGB", (width, height), color="white")
