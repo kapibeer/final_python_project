@@ -21,13 +21,19 @@ class Color(StrEnum):
     YELLOW = "yellow"
     PINK = "pink"
     PURPLE = "purple"
+    NAVY = "navy"
+    ORANGE = "orange"
+    KHAKI = "khaki"
+    MULTICOLOR = "multicolor"
 
 
 class Style(StrEnum):
     CASUAL = "casual"
     SPORT = "sport"
     OFFICIAL = "official"
-    EVENING = "evening" 
+    PARTY = "party"
+    STREET = "street"
+    OUTDOOR = "outdoor"
 
 
 class WarmthLevel(StrEnum):
@@ -36,54 +42,81 @@ class WarmthLevel(StrEnum):
     WARM = "warm"
 
 
-class OuterwearGroup(StrEnum):
-    WINTER_OUTERWEAR = "winter_outerwear"
-    DEMI_SEASON_OUTERWEAR = "demi_season_outerwear"
-    LIGHT_OUTERWEAR = "light_outerwear"
-
-
 class TopGroup(StrEnum):
-    ONEPIECE_CLOTH = "onepiece_cloth"
-    LAYERED_TOPS = "layered_tops"
-    TRANSFORMABLE_TOPS = "transformable_tops"
-    BASE_TOPS = "base_tops"
-    KNITWEAR = "knitwear"
-
-
-class BottomGroup(StrEnum):
-    FULL_LENGTH_BOTTOMS = "full_length_bottoms"
-    MID_LENGTH_BOTTOMS = "mid_length_bottoms"
-    SHORT_LENGTH_BOTTOMS = "short_length_bottoms"
+    ONEPIECE_CLOTH = "onepiece_cloth"           # цельные вещи (платья, комбенизоны)
+    LAYERED_TOPS = "layered_tops"               # одежда, под которую нужно что-то поддевать (зипка, пиджак)
+    TRANSFORMABLE_TOPS = "transformable_tops"   # одежда, под которую можно что-то поддевать, а можно не поддевать (рубашка, кардиган)
+    BASE_TOPS = "base_tops"                     # базовый слой - одежда, которую поддевать (футболка, топ)
+    FINAL_LAYER_TOPS = "final_layer_tops"       # одежда, под которую ничего не подденешь (водолазка, боди)
 
 
 class ClothingSubtype(StrEnum):
-    # Tops
-    DRESS = "dress"
-    ROMPER = "romper"
-    JACKET = "jacket"
-    ZIP-UP_HOODIE = "zip-up_hoodie"
-    CARDIGAN = "cardigan"
-    SHIRT = "shirt"
-    TSHIRT = "tshirt"
-    VEST = "vest"
-    HOODIE = "hoodie"
-    LONGSLEEVE = 'longsleeve'
-    SWEATER = "sweater"
+    # Onepiece cloth
+    DRESS = "dress"                 # платье
+    JUMPSUIT = "jumpsuit"           # кобменизон
+
+    # Layered tops
+    BLAZER = "blazer"               # пиджак
+    ZIP_HOODIE = "zip_hoodie"       # зипка
+
+    # Transformable tops
+    HOODIE = "hoodie"               # худи
+    LONGSLEEVE = 'longsleeve'       # лонгслив (любая кофта с длинным рукавом)
+    CARDIGAN = "cardigan"           # кардиган
+    SHIRT = "shirt"                 # рубашка
+
+    # Final layer tops
+    TURTLENECK = "turtleneck"       # водолазка
+    BODYSUIT = "bodysuit"           # боди
+
+    # Base tops
+    TSHIRT = "tshirt"               # футболка
+    TANK_TOP = "tank_top"           # майка, топик
 
     # Bottoms
-    JEANS = "jeans"
-    TROUSERS = "trousers"
-    SWEATPANTS = "sweatpants"
-    SHORTS = "shorts"
-    SKIRT = "skirt"
-    CAPRIS = "capris"
+    JEANS = "jeans"                 # джинсы
+    TROUSERS = "trousers"           # брюки
+    SWEATPANTS = "sweatpants"       # спортивные штаны/леггинсы
+    SHORTS = "shorts"               # шорты
+    SKIRT = "skirt"                 # юбки
+    JOGGERS = "joggers"             # джоггеры
 
     # Outerwear
-    COAT = "coat"
-    JACKET = "jacket"
-    BOMBER = "bomber"
-    TRENCH = "trench"
-    PUFFER = "puffer"
+    COAT = "coat"                   # пальто
+    JACKET = "jacket"               # куртка
+    BOMBER = "bomber"               # бомбер
+    TRENCH = "trench"               # тренч
+    PUFFER = "puffer"               # пуховик
+    FUR_COAT = "fur_coat"           # шуба
+    SHEEPSKIN_COAT = "sheepskin_coat" # дубленка
+    WINDBREAKER = "windbreaker"     # ветровка
+    JEANS_JACKET = "jeans_jacket"   # джинсовка
+    BIKER_JACKET = "biker_jacket"   # косуха
+
+
+SUBTYPE_TO_TOP_GROUP: dict[ClothingSubtype, TopGroup] = {
+    # Onepiece cloth
+    ClothingSubtype.DRESS: TopGroup.ONEPIECE_CLOTH,
+    ClothingSubtype.JUMPSUIT: TopGroup.ONEPIECE_CLOTH,
+    
+    # Layered Tops
+    ClothingSubtype.BLAZER: TopGroup.LAYERED_TOPS,
+    ClothingSubtype.ZIP_HOODIE: TopGroup.LAYERED_TOPS,
+    
+    # Transformable Tops
+    ClothingSubtype.HOODIE: TopGroup.TRANSFORMABLE_TOPS,
+    ClothingSubtype.LONGSLEEVE: TopGroup.TRANSFORMABLE_TOPS,
+    ClothingSubtype.CARDIGAN: TopGroup.TRANSFORMABLE_TOPS,
+    ClothingSubtype.SHIRT: TopGroup.TRANSFORMABLE_TOPS,
+    
+    # Base Top
+    ClothingSubtype.TSHIRT: TopGroup.BASE_TOPS,
+    ClothingSubtype.TANK_TOP: TopGroup.BASE_TOPS,
+    
+    # Final Layer Tops
+    ClothingSubtype.TURTLENECK: TopGroup.FINAL_LAYER_TOPS,
+    ClothingSubtype.BODESUIT: TopGroup.FINAL_LAYER_TOPS
+}
 
 
 @dataclass
@@ -92,26 +125,22 @@ class ClothingItem:
     owner_id: int
     image_id: str
 
+    category: ClothingCategory
     main_color: Color
-
     style: Style = Style.CASUAL
     warmth_level: WarmthLevel = WarmthLevel.MEDIUM
-
     subtype: ClothingSubtype = ClothingSubtype.TSHIRT
 
+    is_waterproof: Optional[bool] = None
+    is_windproof: Optional[bool] = None
 
-@dataclass
-class Outerwear(ClothingItem):
-    group: OuterwearGroup = OuterwearGroup.LIGHT_OUTERWEAR
-    is_waterproof: bool = False
-    is_windproof: bool = False
+    top_group: Optional[TopGroup] = None
 
-
-@dataclass
-class Top(ClothingItem):
-    group: TopGroup = TopGroup.BASE_TOPS
-
-
-@dataclass
-class Bottom(ClothingItem):
-    group: BottomGroup = BottomGroup.FULL_LENGTH_BOTTOMS
+    def __post_init__(self):
+        self._determine_top_group()
+    
+    def _determine_top_group(self) -> None:
+        if self.category == ClothingCategory.TOP:
+            self.top_group = SUBTYPE_TO_TOP_GROUP.get(self.subtype)
+        else:
+            self.top_group = None
