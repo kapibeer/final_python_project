@@ -43,7 +43,7 @@ class WarmthLevel(StrEnum):
 
 
 class TopGroup(StrEnum):
-    ONEPIECE_CLOTH = "onepiece_cloth"           # цельные вещи (платья, комбенизоны)
+    ONEPIECE_CLOTH = "onepiece_cloth"           # цельные вещи (платья, комбинезоны)
     LAYERED_TOPS = "layered_tops"               # одежда, под которую нужно что-то поддевать (зипка, пиджак)
     TRANSFORMABLE_TOPS = "transformable_tops"   # одежда, под которую можно что-то поддевать, а можно не поддевать (рубашка, кардиган)
     BASE_TOPS = "base_tops"                     # базовый слой - одежда, которую поддевать (футболка, топ)
@@ -88,7 +88,7 @@ class ClothingSubtype(StrEnum):
     TRENCH = "trench"               # тренч
     PUFFER = "puffer"               # пуховик
     FUR_COAT = "fur_coat"           # шуба
-    SHEEPSKIN_COAT = "sheepskin_coat" # дубленка
+    SHEEPSKIN_COAT = "sheepskin_coat"  # дубленка
     WINDBREAKER = "windbreaker"     # ветровка
     JEANS_JACKET = "jeans_jacket"   # джинсовка
     BIKER_JACKET = "biker_jacket"   # косуха
@@ -98,24 +98,24 @@ SUBTYPE_TO_TOP_GROUP: dict[ClothingSubtype, TopGroup] = {
     # Onepiece cloth
     ClothingSubtype.DRESS: TopGroup.ONEPIECE_CLOTH,
     ClothingSubtype.JUMPSUIT: TopGroup.ONEPIECE_CLOTH,
-    
+
     # Layered Tops
     ClothingSubtype.BLAZER: TopGroup.LAYERED_TOPS,
     ClothingSubtype.ZIP_HOODIE: TopGroup.LAYERED_TOPS,
-    
+
     # Transformable Tops
     ClothingSubtype.HOODIE: TopGroup.TRANSFORMABLE_TOPS,
     ClothingSubtype.LONGSLEEVE: TopGroup.TRANSFORMABLE_TOPS,
     ClothingSubtype.CARDIGAN: TopGroup.TRANSFORMABLE_TOPS,
     ClothingSubtype.SHIRT: TopGroup.TRANSFORMABLE_TOPS,
-    
+
     # Base Top
     ClothingSubtype.TSHIRT: TopGroup.BASE_TOPS,
     ClothingSubtype.TANK_TOP: TopGroup.BASE_TOPS,
-    
+
     # Final Layer Tops
     ClothingSubtype.TURTLENECK: TopGroup.FINAL_LAYER_TOPS,
-    ClothingSubtype.BODESUIT: TopGroup.FINAL_LAYER_TOPS
+    ClothingSubtype.BODYSUIT: TopGroup.FINAL_LAYER_TOPS
 }
 
 
@@ -138,7 +138,7 @@ class ClothingItem:
 
     def __post_init__(self):
         self._determine_top_group()
-    
+
     def _determine_top_group(self) -> None:
         if self.category == ClothingCategory.TOP:
             self.top_group = SUBTYPE_TO_TOP_GROUP.get(self.subtype)
