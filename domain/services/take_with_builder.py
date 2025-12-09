@@ -1,6 +1,6 @@
 from domain import WeatherSnap, TakeWith
 from typing import List, Callable
-from datetime import datetime
+from datetime import date
 
 
 class TakeWithBuilder:
@@ -14,11 +14,11 @@ class TakeWithBuilder:
             self._apply_fog_rules,
             self._apply_evening_cooling_rules
         ]
-    
+
     def _get_season(self, today: date) -> str:
         """Определяем сезон по дате"""
         month = today.month
-        
+
         if month in [12, 1, 2]:
             return "winter"
         elif month in [3, 4, 5]:
@@ -27,16 +27,14 @@ class TakeWithBuilder:
             return "summer"
         elif month in [9, 10, 11]:
             return "autumn"
-        
         return "unknown"
-    
+
     def build(self, weather: WeatherSnap) -> TakeWith:
         rec = TakeWith(items=[])
         for rule in self.rules:
             rule(weather, rec)
-        
         return rec
-    
+
     def _apply_sunny_hot_rules(self, weather: WeatherSnap, rec: TakeWith):
         """Правила для солнечной/жаркой погоды"""
         if weather.is_sunny and weather.temperatures.day >= 20:
@@ -44,21 +42,22 @@ class TakeWithBuilder:
             rec.add("солнцезащитные очки")
             if weather.is_uv_high:
                 rec.add("SPF")
-    
+
     def _apply_precipitation_rules(self, weather: WeatherSnap, rec: TakeWith):
         """Правила для осадков"""
+        if weather.is_storm:
+            rec.add("дождевик")
+            return
+
         if weather.is_rain:
             rec.add("зонт")
             rec.add("дождевик")
 
-        if weather.is_storm:
-            rec.add("дождевик")
-    
     def _apply_wind_rules(self, weather: WeatherSnap, rec: TakeWith):
         """Правила для ветреной погоды"""
         if weather.is_windy:
             rec.add("ветровка")
-    
+
     def _apply_cold_rules(self, weather: WeatherSnap, rec: TakeWith):
         """Правила для холодной погоды"""
         temps = weather.temperatures
@@ -67,29 +66,31 @@ class TakeWithBuilder:
             temps.day < 7,
             temps.evening < 3
         ])
-        
+
         if is_cold:
             rec.add("шапка")
             rec.add("шарф")
             rec.add("перчатки/варежки")
-    
+
     def _apply_humidity_rules(self, weather: WeatherSnap, rec: TakeWith):
         """Правила для высокой влажности"""
         if weather.is_humid and weather.temperatures.day < 20:
             rec.add("легкая непромокаемая куртка")
-    
+
     def _apply_fog_rules(self, weather: WeatherSnap, rec: TakeWith):
         """Правила для тумана"""
         if weather.is_fog:
             rec.add("светоотражающие элементы")
-    
-    def _apply_evening_cooling_rules(self, weather: WeatherSnap, rec: TakeWith):
+
+    def _apply_evening_cooling_rules(self, weather: WeatherSnap,
+                                     rec: TakeWith):
         """
         Правила для вечернего похолодания весной, летом и осенью.
-        Если вечером заметно прохладнее, чем днем - советуем взять что-то накинуть.
+        Если вечером заметно прохладнее, чем днем - советуем взять
+        что-то накинуть.
         """
         season = self._get_season(weather.today)
-        
+
         if season in ["spring", "summer", "autumn"]:
             day_temp = weather.temperatures.day
             evening_temp = weather.temperatures.evening
