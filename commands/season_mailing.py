@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 from domain import Season, User
 from domain import UserRepository, WeatherRepository
-from domain import detect_season
+from domain.services.detect_season import detect_season
 from datetime import date
 
 

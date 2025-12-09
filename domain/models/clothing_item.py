@@ -40,14 +40,20 @@ class WarmthLevel(StrEnum):
     LIGHT = "light"
     MEDIUM = "medium"
     WARM = "warm"
+    VERY_WARM = "very_warm"
 
 
 class TopGroup(StrEnum):
-    ONEPIECE_CLOTH = "onepiece_cloth"           # цельные вещи (платья, комбинезоны)
-    LAYERED_TOPS = "layered_tops"               # одежда, под которую нужно что-то поддевать (зипка, пиджак)
-    TRANSFORMABLE_TOPS = "transformable_tops"   # одежда, под которую можно что-то поддевать, а можно не поддевать (рубашка, кардиган)
-    BASE_TOPS = "base_tops"                     # базовый слой - одежда, которую поддевать (футболка, топ)
-    FINAL_LAYER_TOPS = "final_layer_tops"       # одежда, под которую ничего не подденешь (водолазка, боди)
+    ONEPIECE_CLOTH = "onepiece_cloth"
+    # цельные вещи
+    LAYERED_TOPS = "layered_tops"
+    # одежда, под которую нужно что-то поддевать (зипка, пиджак)
+    TRANSFORMABLE_TOPS = "transformable_tops"
+    # одежда, под которую можно что-то поддевать, а можно не поддевать
+    BASE_TOPS = "base_tops"
+    # базовый слой - одежда, которую поддевать (футболка, топ)
+    FINAL_LAYER_TOPS = "final_layer_tops"
+    # одежда, под которую ничего не подденешь (водолазка, боди)
 
 
 class ClothingSubtype(StrEnum):

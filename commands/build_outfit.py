@@ -4,9 +4,10 @@ from typing import List, Optional
 
 from domain import (
     Outfit, Style,
-    OutfitBuilder,
     UserRepository, WardrobeRepository, WeatherRepository,
 )
+
+from domain.services.outfit_builder import OutfitBuilder
 
 
 @dataclass

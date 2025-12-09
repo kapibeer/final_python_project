@@ -4,9 +4,11 @@ from typing import List, Optional
 
 from domain import (
     Outfit, TakeWith,
-    OutfitBuilder, TakeWithBuilder,
     UserRepository, WardrobeRepository, WeatherRepository,
 )
+
+from domain.services.outfit_builder import OutfitBuilder
+from domain.services.take_with_builder import TakeWithBuilder
 
 
 @dataclass

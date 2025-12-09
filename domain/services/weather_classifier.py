@@ -9,14 +9,14 @@ def classify_weather(weather: WeatherSnap) -> int:
     2 — средне
     1 — жарко
     """
-    avg_temp = (weather.morning_temp + weather.day_temp
-                + weather.evening_temp) / 3
+    avg_temp = (weather.temperatures.morning + weather.temperatures.day
+                + weather.temperatures.evening) / 3
 
     if avg_temp <= -5:
         return 4   # very cold
-    elif avg_temp <= 5:
+    elif avg_temp <= 10:
         return 3   # cold
-    elif avg_temp <= 18:
+    elif avg_temp <= 20:
         return 2   # mild
     else:
         return 1   # hot

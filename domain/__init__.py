@@ -1,15 +1,46 @@
+# domain/__init__.py
 # flake8: noqa
-from .models.clothing_item import ClothingItem, Style
+
+# МОДЕЛИ
+from .models.clothing_item import (
+    ClothingItem,
+    Style,
+    TopGroup,
+    ClothingCategory,
+    Color,
+    ClothingSubtype,
+    WarmthLevel,
+    SUBTYPE_TO_TOP_GROUP,
+)
 from .models.outfit import Outfit
 from .models.take_with import TakeWith
-from .models.user import User
 from .models.season import Season
-from .models.weather_snap import WeatherSnap
-from .services.outfit_builder import OutfitBuilder
-from .services.outfit_recommender import OutfitRecommender
-from .services.take_with_builder import TakeWithBuilder
-from .services.weather_classifier import classify_weather
-from .services.detect_season import detect_season
+from .models.user import User
+from .models.weather_snap import WeatherSnap, TemperaturePeriod
+
+# ПРОТОКОЛЫ РЕПОЗИТОРИЕВ
 from .repositories.user_repository import UserRepository
 from .repositories.wardrobe_repository import WardrobeRepository
 from .repositories.weather_repository import WeatherRepository
+
+__all__ = [
+    # модели
+    "ClothingItem",
+    "Style",
+    "TopGroup",
+    "ClothingCategory",
+    "Color",
+    "ClothingSubtype",
+    "WarmthLevel",
+    "SUBTYPE_TO_TOP_GROUP",
+    "Outfit",
+    "TakeWith",
+    "User",
+    "Season",
+    "WeatherSnap",
+    "TemperaturePeriod",
+    # репозитории
+    "UserRepository",
+    "WardrobeRepository",
+    "WeatherRepository",
+]

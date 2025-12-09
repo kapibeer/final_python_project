@@ -5,3 +5,4 @@ __pycache__/
 .ipynb_checkpoints/
 */.ipynb_checkpoints/
 *.DS_Store
+test_outfit_builder.py
