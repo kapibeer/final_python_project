@@ -8,13 +8,17 @@ from domain import (
 )
 
 from domain.services.outfit_builder import OutfitBuilder
+from domain.services.weather_classifier import classify_weather
+from .weather_summary import WeatherSummary
 
 
 @dataclass
 class BuildOutfitResult:
     success: bool
-    message_key: str      # "success", "not_found"
+    message_key: str      # "success", "not_found", "empty_wardrobe"
     outfits: Optional[List[Outfit]] = None
+    weather: Optional[WeatherSummary] = None
+    style_used: Optional[Style] = None
 
 
 class BuildOutfit:
@@ -42,7 +46,7 @@ class BuildOutfit:
         style: Optional[Style] = None,
         count_max: int = 1,
     ) -> BuildOutfitResult:
-        # 1. Получаем пользователя
+
         user = self._user_repo.get(user_id)
         if user is None:
             return BuildOutfitResult(
@@ -50,19 +54,21 @@ class BuildOutfit:
                 message_key="not_found"
             )
 
-        # 2. Получаем гардероб
         wardrobe = self._wardrobe_repo.get_user_wardrobe(user_id)
+        if not wardrobe:
+            return BuildOutfitResult(
+                success=False,
+                message_key="empty_wardrobe"
+            )
 
-        # 3. Определяем локацию
         location = city or user.location
-
-        # 4. Получаем погоду
         weather = self._weather_repo.get_weather(
             date=today,
             city=location,
         )
 
-        # 5. Строим аутфиты через доменный сервис
+        coldness = classify_weather(weather)
+
         outfits = self._outfit_builder.build(
             user=user,
             wardrobe=wardrobe,
@@ -71,8 +77,22 @@ class BuildOutfit:
             count_max=count_max,
         )
 
+        weather_summary = WeatherSummary(
+            city=location,
+            date=today,
+            temp_morning=int(weather.temperatures.morning),
+            temp_day=int(weather.temperatures.day),
+            temp_evening=int(weather.temperatures.evening),
+            is_rain=weather.is_rain,
+            is_snow=weather.is_snow,
+            is_windy=weather.is_windy,
+            coldness_level=coldness,
+        )
+
         return BuildOutfitResult(
             success=True,
             message_key="success",
             outfits=outfits,
+            weather=weather_summary,
+            style_used=style or user.favourite_style,
         )

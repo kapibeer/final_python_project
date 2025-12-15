@@ -6,3 +6,7 @@ __pycache__/
 */.ipynb_checkpoints/
 *.DS_Store
 test_outfit_builder.py
+test_image.py
+img1.jpg
+img2.jpg
+img3.jpg
