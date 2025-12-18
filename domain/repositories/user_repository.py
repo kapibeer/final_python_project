@@ -1,5 +1,6 @@
 from typing import Protocol, Optional, List
 from domain import User
+from datetime import time
 
 
 class UserRepository(Protocol):
@@ -31,4 +32,10 @@ class UserRepository(Protocol):
         Возвращаем список всех пользователей,
         которым нужно получать сезонные уведомления.
         """
+        ...
+
+    def get_users_to_notify_between(self, start: time, end: time) \
+            -> List[User]:
+        """Пользователи, чьё
+        notification_time попадает в [start, end]."""
         ...
