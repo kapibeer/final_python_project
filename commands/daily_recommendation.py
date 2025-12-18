@@ -1,22 +1,25 @@
 from dataclasses import dataclass
 from datetime import date
-from typing import List, Optional
+from typing import Optional
 
 from domain import (
     Outfit, TakeWith,
-    UserRepository, WardrobeRepository, WeatherRepository,
+    UserRepository, WardrobeRepository, WeatherRepository, Style
 )
-
 from domain.services.outfit_builder import OutfitBuilder
 from domain.services.take_with_builder import TakeWithBuilder
+from .weather_summary import WeatherSummary
+from domain.services.weather_classifier import classify_weather
 
 
 @dataclass
 class DailyRecommendationResult:
     success: bool
     message_key: str      # "success", "not_found"
+    outfit: Optional[Outfit] = None
+    weather: Optional[WeatherSummary] = None
+    style_used: Optional[Style] = None
     take_with: Optional[TakeWith] = None
-    outfits: Optional[List[Outfit]] = None
 
 
 class DailyRecommendation:
@@ -42,7 +45,6 @@ class DailyRecommendation:
         self,
         user_id: int,
         today: date,
-        count_max: int = 1,
     ) -> DailyRecommendationResult:
         # 1. Получаем пользователя
         user = self._user_repo.get(user_id)
@@ -67,7 +69,24 @@ class DailyRecommendation:
             wardrobe=wardrobe,
             weather=weather,
             style=None,
-            count_max=count_max,
+            count_max=1,
+        )
+        outfit = None
+        if outfits:
+            outfit = outfits[0]
+
+        # 4. Сводка погоды
+        coldness = classify_weather(weather)
+        weather_summary = WeatherSummary(
+            city=user.location,
+            date=today,
+            temp_morning=int(weather.temperatures.morning),
+            temp_day=int(weather.temperatures.day),
+            temp_evening=int(weather.temperatures.evening),
+            is_rain=weather.is_rain,
+            is_snow=weather.is_snow,
+            is_windy=weather.is_windy,
+            coldness_level=coldness,
         )
 
         # 5. Получаем рекомендации, что взять с собой
@@ -77,5 +96,6 @@ class DailyRecommendation:
             success=True,
             message_key="success",
             take_with=take_with,
-            outfits=outfits
+            outfit=outfit,
+            weather=weather_summary
         )

@@ -130,6 +130,7 @@ class ClothingItem:
     item_id: int
     owner_id: int
     image_id: str
+    name: str
 
     category: ClothingCategory
     main_color: Color
