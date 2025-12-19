@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
-from domain import User, UserRepository
+from domain.models.user import User
+from domain.repositories.user_repository import UserRepository
 
 
 @dataclass

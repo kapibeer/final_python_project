@@ -39,7 +39,7 @@ class DailyRecommendationRenderer:
         parts = [p for p in [header, wish, take_with, outfit_block] if p]
         text = "\n\n".join(parts).strip()
 
-        # если outfit нет — добавим подсказку (но не ломаем остальной текст)
+        # если outfit нет
         if result.outfit is None:
             text += "\n\n" + (
                 "Я не смог собрать лук из текущего гардероба 😔\n"

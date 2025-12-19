@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List
-from domain import ClothingItem
+from .clothing_item import ClothingItem
 
 
 @dataclass

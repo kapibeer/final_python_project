@@ -1,6 +1,6 @@
 from typing import List
-from domain import Outfit
-from commands import BuildOutfitResult
+from domain.models.outfit import Outfit
+from commands.build_outfit import BuildOutfitResult
 from .types import RenderMessage, RenderButton
 
 

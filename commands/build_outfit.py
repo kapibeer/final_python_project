@@ -2,10 +2,11 @@ from dataclasses import dataclass
 from datetime import date
 from typing import List, Optional
 
-from domain import (
-    Outfit, Style,
-    UserRepository, WardrobeRepository, WeatherRepository,
-)
+from domain.models.outfit import Outfit
+from domain.models.clothing_item import Style
+from domain.repositories.user_repository import UserRepository
+from domain.repositories.wardrobe_repository import WardrobeRepository
+from domain.repositories.weather_repository import WeatherRepository
 
 from domain.services.outfit_builder import OutfitBuilder
 from domain.services.weather_classifier import classify_weather

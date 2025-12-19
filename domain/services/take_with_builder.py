@@ -1,4 +1,5 @@
-from domain import WeatherSnap, TakeWith
+from domain.models.weather_snap import WeatherSnap
+from domain.models.take_with import TakeWith
 from typing import List, Callable
 from datetime import date
 

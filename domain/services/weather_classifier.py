@@ -1,4 +1,4 @@
-from domain import WeatherSnap
+from domain.models.weather_snap import WeatherSnap
 
 
 def classify_weather(weather: WeatherSnap) -> int:

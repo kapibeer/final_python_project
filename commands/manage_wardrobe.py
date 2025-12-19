@@ -3,7 +3,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from domain import ClothingItem, WardrobeRepository
+from domain.models.clothing_item import ClothingItem
+from domain.repositories.wardrobe_repository import WardrobeRepository
 
 
 @dataclass

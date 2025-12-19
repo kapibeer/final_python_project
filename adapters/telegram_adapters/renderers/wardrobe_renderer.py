@@ -1,7 +1,5 @@
-# renderers/manage_wardrobe.py
-
 from typing import List
-from domain import ClothingItem
+from domain.models.clothing_item import ClothingItem
 from commands.manage_wardrobe import ManageWardrobeResult
 from .types import RenderMessage, RenderButton
 

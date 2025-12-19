@@ -1,19 +1,21 @@
 from __future__ import annotations
 
-from typing import Optional, List
+from typing import Optional, List, Callable
 from datetime import time
 
 from sqlalchemy import select, and_
 from sqlalchemy.orm import Session
 
-from domain import User, ColdSensitivity, Season, Style
+from domain.models.user import User, ColdSensitivity
+from domain.models.season import Season
+from domain.models.clothing_item import Style
 from domain.repositories.user_repository import UserRepository
 from database_adapters.models.user_table import UserTable
 
 
 class DBUserRepository(UserRepository):
-    def __init__(self, session: Session):
-        self._session = session
+    def __init__(self, session_factory: Callable[[], Session]):
+        self._session_factory = session_factory
 
     # -------------------- mapping --------------------
 
@@ -56,28 +58,32 @@ class DBUserRepository(UserRepository):
     # -------------------- protocol methods --------------------
 
     def get(self, user_id: int) -> Optional[User]:
-        row = self._session.get(UserTable, user_id)
-        return self._to_domain(row) if row else None
+        with self._session_factory() as s:
+            row = s.get(UserTable, user_id)
+            return self._to_domain(row) if row else None
 
     def create(self, user: User) -> None:
-        row = UserTable(user_id=user.user_id)  # PK задаём сами
-        self._apply_domain_to_row(row, user)
-        self._session.add(row)
-        self._session.commit()
+        with self._session_factory() as s:
+            row = UserTable(user_id=user.user_id)  # PK задаём сами
+            self._apply_domain_to_row(row, user)
+            s.add(row)
+            s.commit()
 
     def update(self, user: User) -> None:
-        row = self._session.get(UserTable, user.user_id)
-        if row is None:
-            return
-        self._apply_domain_to_row(row, user)
-        self._session.commit()
+        with self._session_factory() as s:
+            row = s.get(UserTable, user.user_id)
+            if row is None:
+                return
+            self._apply_domain_to_row(row, user)
+            s.commit()
 
     def delete(self, user_id: int) -> None:
-        row = self._session.get(UserTable, user_id)
-        if row is None:
-            return
-        self._session.delete(row)
-        self._session.commit()
+        with self._session_factory() as s:
+            row = s.get(UserTable, user_id)
+            if row is None:
+                return
+            s.delete(row)
+            s.commit()
 
     def get_or_create(self, user: User) -> User:
         existing = self.get(user.user_id)
@@ -87,29 +93,31 @@ class DBUserRepository(UserRepository):
         return user
 
     def get_all_users_with_seasonal_notifications(self) -> List[User]:
-        stmt = select(UserTable).where(
-            UserTable.season_notifications_enabled.is_(True)
-        )
-        rows = self._session.execute(stmt).scalars().all()
-        return [self._to_domain(r) for r in rows]
+        with self._session_factory() as s:
+            stmt = select(UserTable).where(
+                UserTable.season_notifications_enabled.is_(True)
+            )
+            rows = s(stmt).scalars().all()
+            return [self._to_domain(r) for r in rows]
 
     def get_users_to_notify_between(self, start: time, end: time) \
             -> list[User]:
-        stmt = select(UserTable).\
-            where(UserTable.notifications_enabled.is_(True))
+        with self._session_factory() as s:
+            stmt = select(UserTable).\
+                where(UserTable.notifications_enabled.is_(True))
 
-        if start <= end:
-            # обычный случай: 09:55..10:00
-            stmt = stmt.where(
-                and_(UserTable.notification_time >= start,
-                     UserTable.notification_time <= end)
-            )
-        else:
-            # окно пересекает полночь: 23:58..00:03
-            stmt = stmt.where(
-                (UserTable.notification_time >= start) |
-                (UserTable.notification_time <= end)
-            )
+            if start <= end:
+                # обычный случай: 09:55..10:00
+                stmt = stmt.where(
+                    and_(UserTable.notification_time >= start,
+                         UserTable.notification_time <= end)
+                )
+            else:
+                # окно пересекает полночь: 23:58..00:03
+                stmt = stmt.where(
+                    (UserTable.notification_time >= start) |
+                    (UserTable.notification_time <= end)
+                )
 
-        rows = self._session.execute(stmt).scalars().all()
-        return [self._to_domain(r) for r in rows]
+            rows = s.execute(stmt).scalars().all()
+            return [self._to_domain(r) for r in rows]

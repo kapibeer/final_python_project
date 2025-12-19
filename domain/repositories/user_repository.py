@@ -1,5 +1,5 @@
 from typing import Protocol, Optional, List
-from domain import User
+from domain.models.user import User
 from datetime import time
 
 

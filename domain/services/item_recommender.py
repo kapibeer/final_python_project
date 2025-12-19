@@ -1,5 +1,7 @@
 from typing import Protocol, List, Optional, Tuple
-from domain import User, WeatherSnap, ClothingItem, Style
+from domain.models.weather_snap import WeatherSnap
+from domain.models.user import User
+from domain.models.clothing_item import ClothingItem, Style
 
 
 class ItemRecommender(Protocol):

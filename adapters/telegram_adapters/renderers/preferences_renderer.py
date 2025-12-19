@@ -1,7 +1,5 @@
-# renderers/manage_user_preferences.py
-
 from typing import List
-from domain import User
+from domain.models.user import User
 from commands.manage_user_preferences import ManageUserPreferencesResult
 from .types import RenderMessage, RenderButton
 from datetime import time

@@ -1,4 +1,5 @@
-from domain import Season, WeatherSnap
+from domain.models.season import Season
+from domain.models.weather_snap import WeatherSnap
 from datetime import date, timedelta
 from typing import Optional
 

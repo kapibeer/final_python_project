@@ -1,6 +1,9 @@
 from typing import List, Optional, Tuple, Dict
-from domain import User, WeatherSnap, Outfit
-from domain import ClothingItem, Style, Color, ClothingCategory, TopGroup
+from domain.models.outfit import Outfit
+from domain.models.weather_snap import WeatherSnap
+from domain.models.user import User
+from domain.models.clothing_item import ClothingItem, Style, \
+    Color, ClothingCategory, TopGroup
 from domain.services.item_recommender import ItemRecommender
 from domain.services.weather_classifier import classify_weather
 from collections import Counter, defaultdict

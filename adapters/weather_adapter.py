@@ -1,8 +1,8 @@
-from domain import WeatherRepository
 from datetime import date
 from typing import Optional
 import requests
-from domain.models import WeatherSnap, TemperaturePeriod
+from domain.models.weather_snap import WeatherSnap, TemperaturePeriod
+from domain.repositories.weather_repository import WeatherRepository
 
 
 class OpenWeatherAdapter(WeatherRepository):

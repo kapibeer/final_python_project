@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Optional, List
+from typing import Optional, List, Callable
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from domain import (
+from domain.models.clothing_item import (
     ClothingItem,
     ClothingCategory,
     Color,
@@ -18,8 +18,8 @@ from database_adapters.models.wardrobe_table import WardrobeTable
 
 
 class DBWardrobeRepository(WardrobeRepository):
-    def __init__(self, session: Session):
-        self._session = session
+    def __init__(self, session_factory: Callable[[], Session]):
+        self._session_factory = session_factory
 
     # -------------------- mapping --------------------
 
@@ -58,45 +58,51 @@ class DBWardrobeRepository(WardrobeRepository):
     # -------------------- protocol methods --------------------
 
     def get_user_wardrobe(self, user_id: int) -> List[ClothingItem]:
-        stmt = select(WardrobeTable).where(WardrobeTable.owner_id == user_id)
-        rows = self._session.execute(stmt).scalars().all()
-        return [self._to_domain(r) for r in rows]
+        with self._session_factory() as s:
+            stmt = select(WardrobeTable). \
+                where(WardrobeTable.owner_id == user_id)
+            rows = s.execute(stmt).scalars().all()
+            return [self._to_domain(r) for r in rows]
 
     def get_item(self, user_id: int, item_id: int) -> Optional[ClothingItem]:
-        stmt = select(WardrobeTable).where(
-            WardrobeTable.item_id == item_id,
-            WardrobeTable.owner_id == user_id,
-        )
-        row = self._session.execute(stmt).scalars().first()
-        return self._to_domain(row) if row else None
+        with self._session_factory() as s:
+            stmt = select(WardrobeTable).where(
+                WardrobeTable.item_id == item_id,
+                WardrobeTable.owner_id == user_id,
+            )
+            row = s(stmt).scalars().first()
+            return self._to_domain(row) if row else None
 
     def add_item(self, user_id: int, item: ClothingItem) -> int:
-        row = WardrobeTable(owner_id=user_id)
-        self._apply_domain_to_row(row, item)
+        with self._session_factory() as s:
+            row = WardrobeTable(owner_id=user_id)
+            self._apply_domain_to_row(row, item)
 
-        self._session.add(row)
-        self._session.commit()
-        self._session.refresh(row)
+            s.add(row)
+            s.commit()
+            s.refresh(row)
 
-        return row.item_id
+            return row.item_id
 
     def update_item(self, user_id: int, item: ClothingItem) -> None:
         # защищаемся, чтобы нельзя было обновить чужую вещь
-        row = self._session.get(WardrobeTable, item.item_id)
-        if row is None or row.owner_id != user_id:
-            return
+        with self._session_factory() as s:
+            row = s.get(WardrobeTable, item.item_id)
+            if row is None or row.owner_id != user_id:
+                return
 
-        self._apply_domain_to_row(row, item)
-        self._session.commit()
+            self._apply_domain_to_row(row, item)
+            s.commit()
 
     def delete_item(self, user_id: int, item_id: int) -> None:
-        stmt = select(WardrobeTable).where(
-            WardrobeTable.item_id == item_id,
-            WardrobeTable.owner_id == user_id,
-        )
-        row = self._session.execute(stmt).scalars().first()
-        if row is None:
-            return
+        with self._session_factory() as s:
+            stmt = select(WardrobeTable).where(
+                WardrobeTable.item_id == item_id,
+                WardrobeTable.owner_id == user_id,
+            )
+            row = s.execute(stmt).scalars().first()
+            if row is None:
+                return
 
-        self._session.delete(row)
-        self._session.commit()
+            s.delete(row)
+            s.commit()

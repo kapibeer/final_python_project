@@ -1,6 +1,6 @@
 from typing import List, Tuple
 from PIL import Image
-from domain import Outfit
+from domain.models.outfit import Outfit
 from rembg import remove
 import io
 

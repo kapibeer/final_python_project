@@ -1,5 +1,5 @@
 from typing import Protocol
-from domain import WeatherSnap
+from domain.models.weather_snap import WeatherSnap
 from datetime import date
 
 

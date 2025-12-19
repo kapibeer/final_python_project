@@ -1,5 +1,5 @@
 from typing import Protocol, Optional, List
-from domain import ClothingItem
+from domain.models.clothing_item import ClothingItem
 
 
 class WardrobeRepository(Protocol):

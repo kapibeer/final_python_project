@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from domain import Season
-from commands import SeasonMailResult
+from domain.models.season import Season
+from commands.season_mailing import SeasonMailResult
 from .types import RenderMessage, RenderButton
 
 
