@@ -6,10 +6,12 @@ from domain.models.clothing_item import ClothingItem, Style, TopGroup, \
 from domain.services.item_recommender import ItemRecommender
 from domain.services.weather_classifier import classify_weather
 import joblib
+from pathlib import Path
 import pandas as pd
 
-clf = joblib.load("/Users/kapitolinakondakova/PYTHON_FINAL_PROJECT/"
-                  "ml/items_recommender.pkl")
+MODEL_PATH = Path(__file__).resolve().parents[2] / \
+    "ml" / "items_recommender.pkl"
+clf = joblib.load(MODEL_PATH)
 
 
 SIMILAR_STYLES: dict[Style, set[Style]] = {

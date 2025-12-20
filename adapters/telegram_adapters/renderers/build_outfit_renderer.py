@@ -2,8 +2,10 @@ from typing import List
 from domain.models.outfit import Outfit
 from commands.build_outfit import BuildOutfitResult
 from .types import RenderMessage, RenderButton
+from dataclasses import dataclass
 
 
+@dataclass(frozen=True)
 class OutfitBuildRenderer:
     """
     Рендерит один outfit из BuildOutfitResult по индексу.

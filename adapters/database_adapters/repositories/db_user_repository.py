@@ -10,7 +10,7 @@ from domain.models.user import User, ColdSensitivity
 from domain.models.season import Season
 from domain.models.clothing_item import Style
 from domain.repositories.user_repository import UserRepository
-from database_adapters.models.user_table import UserTable
+from adapters.database_adapters.models.user_table import UserTable
 
 
 class DBUserRepository(UserRepository):

@@ -14,7 +14,7 @@ from domain.models.clothing_item import (
     ClothingSubtype,
 )
 from domain.repositories.wardrobe_repository import WardrobeRepository
-from database_adapters.models.wardrobe_table import WardrobeTable
+from adapters.database_adapters.models.wardrobe_table import WardrobeTable
 
 
 class DBWardrobeRepository(WardrobeRepository):
@@ -70,7 +70,7 @@ class DBWardrobeRepository(WardrobeRepository):
                 WardrobeTable.item_id == item_id,
                 WardrobeTable.owner_id == user_id,
             )
-            row = s(stmt).scalars().first()
+            row = s.execute(stmt).scalars().first()
             return self._to_domain(row) if row else None
 
     def add_item(self, user_id: int, item: ClothingItem) -> int:

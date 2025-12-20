@@ -1,7 +1,21 @@
-from typing import List
 from domain.models.clothing_item import ClothingItem
 from commands.manage_wardrobe import ManageWardrobeResult
 from .types import RenderMessage, RenderButton
+
+
+def _item_summary(data: dict) -> str:
+    # аккуратно, чтобы не падать если чего-то нет
+    return (
+        "Проверь, всё ок?\n\n"
+        f"• Название: {data.get('name','-')}\n"
+        f"• Категория: {data.get('category','-')}\n"
+        f"• Подтип: {data.get('subtype','-')}\n"
+        f"• Цвет: {data.get('main_color','-')}\n"
+        f"• Стиль: {data.get('style','-')}\n"
+        f"• Теплота: {data.get('warmth_level','-')}\n"
+        f"• Водозащита: {data.get('is_waterproof', False)}\n"
+        f"• Ветрозащита: {data.get('is_windproof', False)}\n"
+        f"• Фото: {'есть' if data.get('image_id') else 'нет'}")
 
 
 class ManageWardrobeRenderer:
@@ -35,7 +49,6 @@ class ManageWardrobeRenderer:
     def _render_added(self, item: ClothingItem) -> RenderMessage:
         text = (
             "✨ Вещь добавлена в гардероб!\n\n"
-            + self._render_item(item)
         )
 
         buttons = [
@@ -49,7 +62,6 @@ class ManageWardrobeRenderer:
     def _render_updated(self, item: ClothingItem) -> RenderMessage:
         text = (
             "✏️ Вещь обновлена!\n\n"
-            + self._render_item(item)
         )
 
         buttons = [
@@ -89,19 +101,3 @@ class ManageWardrobeRenderer:
                     [RenderButton("🏠 Меню", "menu:home")],
                 ],
         )
-
-    # -------------------- helpers --------------------
-
-    def _render_item(self, item: ClothingItem) -> str:
-        """
-        Короткое текстовое описание вещи.
-        """
-        lines: List[str] = [
-            f"• Название: {item.name}"
-            f"• Категория: {item.category.value}",
-            f"• Тип: {item.subtype.value}",
-            f"• Стиль: {item.style.value}",
-            f"• Цвет: {item.main_color.value}",
-            f"• Теплота: {item.warmth_level.value}",
-        ]
-        return "\n".join(lines)

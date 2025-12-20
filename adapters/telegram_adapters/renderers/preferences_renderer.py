@@ -3,8 +3,10 @@ from domain.models.user import User
 from commands.manage_user_preferences import ManageUserPreferencesResult
 from .types import RenderMessage, RenderButton
 from datetime import time
+from dataclasses import dataclass
 
 
+@dataclass(frozen=True)
 class ManageUserPreferencesRenderer:
     """
     Рендерит результат обновления настроек пользователя.

@@ -4,8 +4,10 @@ from typing import List, Optional
 from domain import Outfit
 from commands import DailyRecommendationResult
 from .types import RenderMessage, RenderButton
+from dataclasses import dataclass
 
 
+@dataclass(frozen=True)
 class DailyRecommendationRenderer:
     """
     Рендерит daily recommendation:

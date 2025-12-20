@@ -1,7 +1,7 @@
-from dataclasses import dataclass
 from domain.models.season import Season
 from commands.season_mailing import SeasonMailResult
 from .types import RenderMessage, RenderButton
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
