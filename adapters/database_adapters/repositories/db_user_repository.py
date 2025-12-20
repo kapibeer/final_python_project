@@ -97,7 +97,7 @@ class DBUserRepository(UserRepository):
             stmt = select(UserTable).where(
                 UserTable.season_notifications_enabled.is_(True)
             )
-            rows = s(stmt).scalars().all()
+            rows = s.execute(stmt).scalars().all()
             return [self._to_domain(r) for r in rows]
 
     def get_users_to_notify_between(self, start: time, end: time) \

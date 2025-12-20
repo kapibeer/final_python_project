@@ -2,7 +2,6 @@ from typing import List
 from domain.models.user import User
 from commands.manage_user_preferences import ManageUserPreferencesResult
 from .types import RenderMessage, RenderButton
-from datetime import time
 from dataclasses import dataclass
 
 
@@ -16,7 +15,7 @@ class ManageUserPreferencesRenderer:
         if not result.success:
             return self._render_error(result.message_key)
 
-        if result.message_key == "updated":
+        if result.message_key == "updated" and result.user is not None:
             return self._render_updated(result.user)
 
         return RenderMessage(
@@ -27,7 +26,7 @@ class ManageUserPreferencesRenderer:
     # -------------------- success --------------------
 
     def _render_updated(self, user: User) -> RenderMessage:
-        text = "✅ Настройки обновлены!\n\n" + self._render_user_summary(user)
+        text = "✅ Настройки обновлены!\n\n"
 
         buttons = [
             [RenderButton("🎛 Настройки", "prefs:open")],
@@ -53,44 +52,41 @@ class ManageUserPreferencesRenderer:
 
     # -------------------- helpers --------------------
 
-    def _render_user_summary(self, user: User) -> str:
+    def render_user_summary(self, user: User) -> str:
         lines: List[str] = []
 
         lines.append(f"• Ник: {user.username}")
-        lines.append(f"• Пол: {user.gender}")
+        lines.append(f"• Пол: {'👩' if user.gender == 'female' else '👨'}")
         lines.append(f"• Возраст: {user.age}")
         lines.append(f"• Город: {user.location}")
 
         # cold sensitivity
-        if user.cold_sensitivity is not None:
-            lines.append(
+        lines.append(
                 f"• Мерзлявость: {user.cold_sensitivity.value}"
             )
 
         # favourite style
-        if user.favourite_style is not None:
-            lines.append(
+        lines.append(
                 f"• Любимый стиль: {user.favourite_style.value}"
-            )
+        )
 
         # notification time
-        if isinstance(user.notification_time, time):
-            lines.append(
+        lines.append(
                 f"• Время уведомлений: "
                 f"{user.notification_time.strftime('%H:%M')}"
             )
 
         # notifications enabled
-        str_enabled = 'включены' \
-            if user.notifications_enabled else 'выключены'
+        str_enabled = '✅' \
+            if user.notifications_enabled else '❌'
         lines.append(
-            f"• Уведомления {str_enabled}"
+            f"• Уведомления: {str_enabled}"
         )
 
         # seasonal notifications
-        str_seasonal_enabled = 'включены' \
-            if user.season_notifications_enabled else 'выключены'
+        str_seasonal_enabled = '✅' \
+            if user.season_notifications_enabled else '❌'
         lines.append(
-            f"• Сезонные уведомления {str_seasonal_enabled}"
+            f"• Сезонные уведомления: {str_seasonal_enabled}"
         )
         return "\n".join(lines)

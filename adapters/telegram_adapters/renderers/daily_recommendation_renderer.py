@@ -1,8 +1,8 @@
 import random
 from typing import List, Optional
 
-from domain import Outfit
-from commands import DailyRecommendationResult
+from domain.models.outfit import Outfit
+from commands.daily_recommendation import DailyRecommendationResult
 from .types import RenderMessage, RenderButton
 from dataclasses import dataclass
 
@@ -93,8 +93,8 @@ class DailyRecommendationRenderer:
             icons.append("💨")
         icons_str = (" ".join(icons) + " ") if icons else ""
 
-        city = getattr(w, "city", getattr(w, "location", ""))
-        dt = getattr(w, "today", getattr(w, "date", None))
+        city = w.city
+        dt = w.required_date
         date_str = dt.isoformat() if hasattr(dt, "isoformat") else ""
 
         t_m = getattr(w, "temp_morning", "")

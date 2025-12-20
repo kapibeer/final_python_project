@@ -1,7 +1,7 @@
 # commands/manage_wardrobe.py
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Any
 
 from domain.models.clothing_item import ClothingItem
 from domain.repositories.wardrobe_repository import WardrobeRepository
@@ -32,7 +32,7 @@ class ManageWardrobe:
             item=item
         )
 
-    def update_item(self, user_id: int, item_id: int, **updates)\
+    def update_item(self, user_id: int, item_id: int, **updates: Any)\
             -> ManageWardrobeResult:
         existing = self._wardrobe_repo.get_item(user_id, item_id)
         if existing is None:
@@ -57,4 +57,4 @@ class ManageWardrobe:
         return ManageWardrobeResult(
             success=True,
             message_key="deleted"
-        )
+            )

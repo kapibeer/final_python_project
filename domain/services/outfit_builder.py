@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Dict
+from typing import List, Optional, Tuple, Dict, Any
 from domain.models.outfit import Outfit
 from domain.models.weather_snap import WeatherSnap
 from domain.models.user import User
@@ -295,7 +295,7 @@ class OutfitBuilder:
 
         # Генерируем много кандидатов-аутфитов с рандомом
         candidates: List[Outfit] = []
-        seen_signatures = set()
+        seen_signatures: set[tuple[Any]] = set()
 
         max_outfits = max(1, count_max)
         max_attempts = max_outfits * 10
@@ -331,7 +331,8 @@ class OutfitBuilder:
                 continue
 
             # проверяем, что не было такого еще
-            signature = tuple(sorted(i.item_id for i in items_for_outfit))
+            signature: tuple[Any] = \
+                tuple(sorted(i.item_id for i in items_for_outfit))
             if signature in seen_signatures:
                 continue
 

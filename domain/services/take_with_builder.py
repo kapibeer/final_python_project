@@ -16,9 +16,9 @@ class TakeWithBuilder:
             self._apply_evening_cooling_rules
         ]
 
-    def _get_season(self, today: date) -> str:
+    def _get_season(self, required_date: date) -> str:
         """Определяем сезон по дате"""
-        month = today.month
+        month = required_date.month
 
         if month in [12, 1, 2]:
             return "winter"
@@ -90,7 +90,7 @@ class TakeWithBuilder:
         Если вечером заметно прохладнее, чем днем - советуем взять
         что-то накинуть.
         """
-        season = self._get_season(weather.today)
+        season = self._get_season(weather.required_date)
 
         if season in ["spring", "summer", "autumn"]:
             day_temp = weather.temperatures.day

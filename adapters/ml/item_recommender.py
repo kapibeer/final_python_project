@@ -1,17 +1,17 @@
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict, Tuple, Any
 from domain.models.user import User
 from domain.models.weather_snap import WeatherSnap
 from domain.models.clothing_item import ClothingItem, Style, TopGroup, \
     ClothingCategory, WarmthLevel
 from domain.services.item_recommender import ItemRecommender
 from domain.services.weather_classifier import classify_weather
-import joblib
+import joblib  # type: ignore
 from pathlib import Path
 import pandas as pd
 
 MODEL_PATH = Path(__file__).resolve().parents[2] / \
     "ml" / "items_recommender.pkl"
-clf = joblib.load(MODEL_PATH)
+clf = joblib.load(MODEL_PATH)  # type: ignore
 
 
 SIMILAR_STYLES: dict[Style, set[Style]] = {
@@ -96,8 +96,7 @@ class MLItemRecommender(ItemRecommender):
         scored_items: List[Tuple[ClothingItem, float]] = list(
             zip(wardrobe, probs)
         )
-        if effective_style is not None:
-            scored_items = self._apply_style_boost(scored_items, style)
+        scored_items = self._apply_style_boost(scored_items, effective_style)
         scored_items.sort(key=lambda x: x[1], reverse=True)
         return scored_items
 
@@ -136,7 +135,7 @@ class MLItemRecommender(ItemRecommender):
         item: ClothingItem,
         weather_coldness: int,
         style: Style,
-    ) -> dict:
+    ) -> dict[str, Any]:
         user_style_str = style.value
 
         return {

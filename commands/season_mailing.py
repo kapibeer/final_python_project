@@ -5,6 +5,7 @@ from domain.models.user import User
 from domain.repositories.user_repository import UserRepository
 from domain.repositories.weather_repository import WeatherRepository
 from domain.services.detect_season import detect_season
+from domain.models.weather_snap import WeatherSnap
 from datetime import date
 
 
@@ -37,27 +38,28 @@ class SeasonMailing:
 
         for user in users:
             # Получаем погоду для города пользователя
-            weather = self._weather_repo.get_weather(today=today,
-                                                     city=user.location)
+            weather: Optional[WeatherSnap] = \
+                self._weather_repo.get_weather(required_date=today,
+                                               city=user.location)
+            if weather is not None:
+                # Определяем сезон по погоде пользователя
+                current_season: Optional[Season] = detect_season(weather)
+                if current_season is None:
+                    continue
+                # Если этому пользователю уже отправляли
+                # уведомление для этого сезона — пропускаем
+                if user.last_season_notifiied == current_season:
+                    continue
 
-            # Определяем сезон по погоде пользователя
-            current_season: Optional[Season] = detect_season(weather)
-            if current_season is None:
-                continue
-            # Если этому пользователю уже отправляли
-            # уведомление для этого сезона — пропускаем
-            if user.last_season_notified == current_season:
-                continue
-
-            results.append(
-                SeasonMailResult(
-                    user_id=user.id,
-                    season=current_season,
+                results.append(
+                    SeasonMailResult(
+                        user_id=user.user_id,
+                        season=current_season,
+                    )
                 )
-            )
 
-            # Обновляем пользователя: помечаем, что ему этот сезон уже отослали
-            user.last_season_notified = current_season
-            self._user_repo.update(user)
+                # Обновляем пользователя
+                user.last_season_notifiied = current_season
+                self._user_repo.update(user)
 
         return results

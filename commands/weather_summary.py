@@ -5,7 +5,7 @@ from datetime import date
 @dataclass
 class WeatherSummary:
     city: str
-    today: date
+    required_date: date
     temp_morning: int
     temp_day: int
     temp_evening: int

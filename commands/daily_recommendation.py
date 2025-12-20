@@ -5,6 +5,7 @@ from typing import Optional
 from domain.models.outfit import Outfit
 from domain.models.clothing_item import Style
 from domain.models.take_with import TakeWith
+from domain.models.weather_snap import WeatherSnap
 
 from domain.repositories.user_repository import UserRepository
 from domain.repositories.wardrobe_repository import WardrobeRepository
@@ -62,44 +63,48 @@ class DailyRecommendation:
         wardrobe = self._wardrobe_repo.get_user_wardrobe(user_id)
 
         # 3. Получаем погоду
-        weather = self._weather_repo.get_weather(
-            date=today,
+        weather: Optional[WeatherSnap] = self._weather_repo.get_weather(
+            required_date=today,
             city=user.location,
         )
+        if weather is not None:
+            # 4. Строим аутфиты через доменный сервис
+            outfits = self._outfit_builder.build(
+                user=user,
+                wardrobe=wardrobe,
+                weather=weather,
+                style=None,
+                count_max=1,
+            )
+            outfit = None
+            if outfits:
+                outfit = outfits[0]
 
-        # 4. Строим аутфиты через доменный сервис
-        outfits = self._outfit_builder.build(
-            user=user,
-            wardrobe=wardrobe,
-            weather=weather,
-            style=None,
-            count_max=1,
-        )
-        outfit = None
-        if outfits:
-            outfit = outfits[0]
+            # 4. Сводка погоды
+            coldness = classify_weather(weather)
+            weather_summary = WeatherSummary(
+                city=user.location,
+                required_date=today,
+                temp_morning=int(weather.temperatures.morning),
+                temp_day=int(weather.temperatures.day),
+                temp_evening=int(weather.temperatures.evening),
+                is_rain=weather.is_rain,
+                is_snow=weather.is_snow,
+                is_windy=weather.is_windy,
+                coldness_level=coldness,
+            )
 
-        # 4. Сводка погоды
-        coldness = classify_weather(weather)
-        weather_summary = WeatherSummary(
-            city=user.location,
-            date=today,
-            temp_morning=int(weather.temperatures.morning),
-            temp_day=int(weather.temperatures.day),
-            temp_evening=int(weather.temperatures.evening),
-            is_rain=weather.is_rain,
-            is_snow=weather.is_snow,
-            is_windy=weather.is_windy,
-            coldness_level=coldness,
-        )
+            # 5. Получаем рекомендации, что взять с собой
+            take_with = self._take_with_builder.build(weather)
 
-        # 5. Получаем рекомендации, что взять с собой
-        take_with = self._take_with_builder.build(weather)
-
+            return DailyRecommendationResult(
+                success=True,
+                message_key="success",
+                take_with=take_with,
+                outfit=outfit,
+                weather=weather_summary
+            )
         return DailyRecommendationResult(
-            success=True,
-            message_key="success",
-            take_with=take_with,
-            outfit=outfit,
-            weather=weather_summary
-        )
+                success=False,
+                message_key=""
+            )

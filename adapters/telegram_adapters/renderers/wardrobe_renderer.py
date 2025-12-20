@@ -1,9 +1,10 @@
 from domain.models.clothing_item import ClothingItem
 from commands.manage_wardrobe import ManageWardrobeResult
 from .types import RenderMessage, RenderButton
+from typing import Any
 
 
-def _item_summary(data: dict) -> str:
+def item_summary(data: dict[Any, Any]) -> str:
     # аккуратно, чтобы не падать если чего-то нет
     return (
         "Проверь, всё ок?\n\n"
@@ -27,12 +28,12 @@ class ManageWardrobeRenderer:
     def render(self, result: ManageWardrobeResult) -> RenderMessage:
         if not result.success:
             return self._render_error(result.message_key)
+        if result.item is not None:
+            if result.message_key == "added":
+                return self._render_added(result.item)
 
-        if result.message_key == "added":
-            return self._render_added(result.item)
-
-        if result.message_key == "updated":
-            return self._render_updated(result.item)
+            if result.message_key == "updated":
+                return self._render_updated(result.item)
 
         if result.message_key == "deleted":
             return self._render_deleted()

@@ -31,7 +31,7 @@ class OutfitBuildRenderer:
 
         # клавиатура
         if idx >= total - 1:
-            buttons = [
+            buttons: List[List[RenderButton]] = [
                 [RenderButton("🔁 Сгенерировать ещё",
                               self._regen_callback(result))],
                 [RenderButton("🧥 Гардероб", "wardrobe:open"),
@@ -100,9 +100,8 @@ class OutfitBuildRenderer:
             icons.append("💨")
         icons_str = (" ".join(icons) + " ") if icons else ""
 
-        # аккуратно, чтобы не зависеть от точных названий полей WeatherSummary
-        location = getattr(w, "location", None) or getattr(w, "city", "")
-        dt = getattr(w, "date", None) or getattr(w, "today", None)
+        location = w.city
+        dt = w.required_date
         date_str = dt.isoformat() if hasattr(dt, "isoformat") else ""
 
         temps = getattr(w, "temperatures", None)

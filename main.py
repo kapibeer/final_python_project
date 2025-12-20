@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from infra.container import Container
-from infra.database import make_session_factory, make_engine
+from infra.database import make_session_factory, make_engine  # type: ignore
 
 from adapters.database_adapters.models.base import Base
 
@@ -14,6 +14,8 @@ from adapters.database_adapters.models.wardrobe_table import WardrobeTable  # no
 
 from bot.handlers.start import router as start_router
 from bot.handlers.wardrobe import router as wardrobe_router
+from bot.handlers.menu import router as menu_router
+from bot.handlers.preferences import router as prefs_router
 
 
 async def main():
@@ -30,8 +32,10 @@ async def main():
 
     dp.include_router(start_router)
     dp.include_router(wardrobe_router)
+    dp.include_router(menu_router)
+    dp.include_router(prefs_router)
 
-    await dp.start_polling(bot, container=container)
+    await dp.start_polling(bot, container=container)  # type: ignore
 
 if __name__ == "__main__":
     asyncio.run(main())

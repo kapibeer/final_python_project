@@ -138,8 +138,8 @@ class ClothingItem:
     warmth_level: WarmthLevel = WarmthLevel.MEDIUM
     subtype: ClothingSubtype = ClothingSubtype.TSHIRT
 
-    is_waterproof: Optional[bool] = None
-    is_windproof: Optional[bool] = None
+    is_waterproof: bool = False
+    is_windproof: bool = False
 
     top_group: Optional[TopGroup] = None
 

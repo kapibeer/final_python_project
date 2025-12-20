@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Any
 from domain.models.user import User
 from domain.repositories.user_repository import UserRepository
 
@@ -20,7 +20,7 @@ class ManageUserPreferences:
     def __init__(self, user_repo: UserRepository):
         self._user_repo = user_repo
 
-    def update_preferences(self, user_id: int, **updates)\
+    def update_preferences(self, user_id: int, **updates: Any)\
             -> ManageUserPreferencesResult:
         """
         Обновляет только те поля, которые пришли в updates.

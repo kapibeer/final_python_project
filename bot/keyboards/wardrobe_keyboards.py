@@ -1,15 +1,16 @@
-from bot.keyboards.keyboard_helper import _kb
+from bot.keyboards.keyboard_helper import kb
 from adapters.telegram_adapters.renderers.types import RenderButton
 from domain.repositories.wardrobe_repository import WardrobeRepository
 from domain.models.clothing_item import ClothingItem
 from typing import List
+from aiogram.types import InlineKeyboardMarkup
 
 
 # -----------------------------
 # CATEGORY
 # -----------------------------
 
-CategoryKeyboard = _kb([
+CategoryKeyboard = kb([
     [
         RenderButton("🧥 Верхняя одежда", "item:cat:outerwear"),
         RenderButton("👕 Верх", "item:cat:top"),
@@ -25,7 +26,7 @@ CategoryKeyboard = _kb([
 # TOP SUBTYPES
 # -----------------------------
 
-TopSubtypeKeyboard = _kb([
+TopSubtypeKeyboard = kb([
     [
         RenderButton("Футболка", "item:subtype:tshirt"),
         RenderButton("Лонгслив", "item:subtype:longsleeve"),
@@ -56,7 +57,7 @@ TopSubtypeKeyboard = _kb([
 # BOTTOM SUBTYPES
 # -----------------------------
 
-BottomSubtypeKeyboard = _kb([
+BottomSubtypeKeyboard = kb([
     [
         RenderButton("Джинсы", "item:subtype:jeans"),
         RenderButton("Брюки", "item:subtype:trousers"),
@@ -79,7 +80,7 @@ BottomSubtypeKeyboard = _kb([
 # OUTERWEAR SUBTYPES
 # -----------------------------
 
-OuterwearSubtypeKeyboard = _kb([
+OuterwearSubtypeKeyboard = kb([
     [
         RenderButton("Пальто", "item:subtype:coat"),
         RenderButton("Куртка", "item:subtype:jacket"),
@@ -110,7 +111,7 @@ OuterwearSubtypeKeyboard = _kb([
 # COLORS
 # -----------------------------
 
-ColorKeyboard = _kb([
+ColorKeyboard = kb([
     [
         RenderButton("Чёрный", "item:color:black"),
         RenderButton("Белый", "item:color:white"),
@@ -146,7 +147,7 @@ ColorKeyboard = _kb([
 # STYLE
 # -----------------------------
 
-StyleKeyboard = _kb([
+StyleKeyboard = kb([
     [
         RenderButton("👕 Casual", "item:style:casual"),
         RenderButton("🧥 Official", "item:style:official"),
@@ -169,7 +170,7 @@ StyleKeyboard = _kb([
 # WARMTH
 # -----------------------------
 
-WarmthKeyboard = _kb([
+WarmthKeyboard = kb([
     [
         RenderButton("Лёгкая", "item:warmth:light"),
         RenderButton("Средняя", "item:warmth:medium"),
@@ -188,7 +189,7 @@ WarmthKeyboard = _kb([
 # WATER / WIND
 # -----------------------------
 
-YesNoKeyboard = _kb([
+YesNoKeyboard = kb([
     [
         RenderButton("✅ Да", "item:yes"),
         RenderButton("❌ Нет", "item:no"),
@@ -203,7 +204,7 @@ YesNoKeyboard = _kb([
 # CONFIRM
 # -----------------------------
 
-ConfirmKeyboard = _kb([
+ConfirmKeyboard = kb([
     [
         RenderButton("💾 Сохранить", "item:confirm:save"),
         RenderButton("❌ Отмена", "wardrobe:add:cancel"),
@@ -212,11 +213,11 @@ ConfirmKeyboard = _kb([
 
 
 def UserItemsKeyboard(user_id: int, wardrobe_repo: WardrobeRepository,
-                      action: str):
+                      action: str) -> InlineKeyboardMarkup:
     wardrobe: List[ClothingItem] = \
         wardrobe_repo.get_user_wardrobe(user_id=user_id)
-    buttons: List[RenderButton] = []
+    buttons: List[List[RenderButton]] = []
     for item in wardrobe:
         buttons.append([RenderButton(item.name,
                                      f"item:{action}:{item.item_id}")])
-    return _kb(buttons)
+    return kb(buttons)

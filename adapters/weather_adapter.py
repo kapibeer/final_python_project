@@ -1,8 +1,8 @@
+from domain.repositories.weather_repository import WeatherRepository
 from datetime import date
-from typing import Optional
+from typing import Optional, Any
 import requests
 from domain.models.weather_snap import WeatherSnap, TemperaturePeriod
-from domain.repositories.weather_repository import WeatherRepository
 
 
 class OpenWeatherAdapter(WeatherRepository):
@@ -22,7 +22,7 @@ class OpenWeatherAdapter(WeatherRepository):
         if step_days < 0 or step_days >= 14:
             return None
 
-        params = {
+        params: dict[Any, Any] = {
             "key": self.api_key,
             "q": city,
             "lang": "en",
@@ -32,7 +32,7 @@ class OpenWeatherAdapter(WeatherRepository):
         }
 
         try:
-            response = requests.get(self.base_url, params=params, timeout=10)
+            response = requests.get(self.base_url, params=params, timeout=3)
             forecast_days = response.json()
             data = forecast_days['forecast']['forecastday'][step_days]
         except Exception:
@@ -69,7 +69,7 @@ class OpenWeatherAdapter(WeatherRepository):
 
         return WeatherSnap(
             location=city,
-            today=required_date,
+            required_date=required_date,
             temperatures=temperatures,
             is_rain=is_rain,
             is_snow=is_snow,

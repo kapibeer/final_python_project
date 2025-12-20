@@ -10,5 +10,6 @@ def make_engine():
     )
 
 
-def make_session_factory(engine):
-    return sessionmaker(bind=engine, autoflush=False, autocommit=False)
+def make_session_factory(engine):  # type: ignore
+    return sessionmaker(bind=engine,  # type: ignore
+                        autoflush=False, autocommit=False)

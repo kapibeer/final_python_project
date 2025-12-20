@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from PIL import Image
 from domain.models.outfit import Outfit
-from rembg import remove
+from rembg import remove  # type: ignore
 import io
 
 
@@ -44,7 +44,7 @@ class OutfitImageRenderer:
         if not images:
             return Image.new("RGB", canvas_size,
                              color=self._parse_color(bg_color))
-        processed_images = []
+        processed_images: list[Image.Image] = []
         for img in images:
             compressed_img = self._compress_image(img, self.default_item_size)
             clean_img = self.delete_background(compressed_img)
@@ -69,7 +69,7 @@ class OutfitImageRenderer:
         image.save(buf, format="PNG")
         input_bytes = buf.getvalue()
 
-        output_bytes = remove(input_bytes)
+        output_bytes: bytes = remove(input_bytes)  # type: ignore
 
         result = Image.open(io.BytesIO(output_bytes)).convert("RGBA")
         return result

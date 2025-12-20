@@ -23,23 +23,25 @@ class SeasonChangeDetector:
         Проверяет, пора ли отправлять уведомление о смене сезона.
         Возвращает следующий сезон, если пора, иначе None.
         """
-        today = weather.today
+        required_date = weather.required_date
 
-        season_today = self._get_season_start_if_today(today)
+        season_today = self._get_season_start_if_today(required_date)
         if season_today is not None:
             return season_today
 
         for season in Season:
-            if self._should_notify_about_season(today, weather, season):
+            if self._should_notify_about_season(required_date,
+                                                weather, season):
                 return season
 
         return None
 
-    def _get_season_start_if_today(self, today: date) -> Optional[Season]:
+    def _get_season_start_if_today(self, required_date: date) \
+            -> Optional[Season]:
         """
         Возвращает сезон, который начинается сегодня, или None.
         """
-        month, day = today.month, today.day
+        month, day = required_date.month, required_date.day
         for season, (start_month, start_day) in self.season_starts.items():
             if month == start_month and day == start_day:
                 return season
@@ -47,7 +49,7 @@ class SeasonChangeDetector:
 
     def _should_notify_about_season(
         self,
-        today: date,
+        required_date: date,
         weather: WeatherSnap,
         target_season: Season,
     ) -> bool:
@@ -55,14 +57,14 @@ class SeasonChangeDetector:
         Проверяет, нужно ли уведомлять о конкретном сезоне.
         """
         month_start, day_start = self.season_starts[target_season]
-        year = today.year
-        if target_season == Season.SPRING and today.month == 12:
+        year = required_date.year
+        if target_season == Season.SPRING and required_date.month == 12:
             year += 1
 
         season_start = date(year, month_start, day_start)
         three_weeks_before = season_start - timedelta(days=21)
 
-        if not (three_weeks_before <= today <= season_start):
+        if not (three_weeks_before <= required_date <= season_start):
             return False
 
         return self._has_season_signs(weather, target_season)
