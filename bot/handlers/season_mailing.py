@@ -1,34 +1,23 @@
-from __future__ import annotations
-
-from aiogram import Router, F, Bot
-from aiogram.types import Message
-
+from aiogram import Bot
 from infra.container import Container
 from commands.season_mailing import SeasonMailing
-from adapters.telegram_adapters.renderers.season_mailing_renderer import (
-    SeasonMailingRenderer,
-)
-
-router = Router()
+from adapters.telegram_adapters.renderers.season_mailing_renderer \
+    import SeasonMailingRenderer
 
 
-@router.message(F.text == "/season_mailing")
-async def season_mailing_cmd(msg: Message, bot: Bot, container: Container) \
-        -> None:
-    """
-    Ручной запуск сезонной рассылки командой.
-    """
+async def run_season_mailing(bot: Bot, container: Container) \
+        -> tuple[int, int]:
     usecase: SeasonMailing = container.season_mailing()
     renderer = SeasonMailingRenderer()
 
     results = usecase.run()
-
     sent = 0
     failed = 0
 
     for r in results:
         rendered = renderer.render(r)
-
+        if not rendered.text.strip():
+            continue
         try:
             await bot.send_message(
                 chat_id=r.user_id,
@@ -39,7 +28,4 @@ async def season_mailing_cmd(msg: Message, bot: Bot, container: Container) \
         except Exception:
             failed += 1
 
-    print(
-        f"✅ Season mailing done.\n"
-        f"Sent: {sent}\nFailed: {failed}"
-    )
+    return sent, failed

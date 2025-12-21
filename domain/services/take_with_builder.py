@@ -52,7 +52,6 @@ class TakeWithBuilder:
 
         if weather.is_rain:
             rec.add("зонт")
-            rec.add("дождевик")
 
     def _apply_wind_rules(self, weather: WeatherSnap, rec: TakeWith):
         """Правила для ветреной погоды"""
@@ -91,17 +90,25 @@ class TakeWithBuilder:
         что-то накинуть.
         """
         season = self._get_season(weather.required_date)
-
-        if season in ["spring", "summer", "autumn"]:
+        morning_temp = weather.temperatures.morning
+        day_temp = weather.temperatures.day
+        evening_temp = weather.temperatures.evening
+        avg = (morning_temp + day_temp + evening_temp) / 3
+        if season in ["spring", "summer", "autumn"] or avg >= 10:
+            morning_temp = weather.temperatures.morning
             day_temp = weather.temperatures.day
             evening_temp = weather.temperatures.evening
-            temperature_diff = day_temp - evening_temp
+            temperature_diff = max(day_temp - evening_temp,
+                                   day_temp - morning_temp)
             if season == "spring":
-                if day_temp >= 15 and temperature_diff >= 8:
+                if day_temp >= 15 and temperature_diff >= 5:
                     rec.add("легкая куртка")
             elif season == "summer":
-                if day_temp >= 20 and temperature_diff >= 10:
+                if day_temp >= 20 and temperature_diff >= 7:
                     rec.add("легкая кофта")
             elif season == "autumn":
-                if day_temp >= 15 and temperature_diff >= 7:
+                if day_temp >= 15 and temperature_diff >= 5:
+                    rec.add("куртка")
+            else:
+                if day_temp >= 15 and temperature_diff >= 5:
                     rec.add("куртка")

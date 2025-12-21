@@ -1,135 +1,124 @@
-from typing import List, Tuple, Callable, Awaitable, Optional
-from PIL import Image
-from domain.models.outfit import Outfit
-from rembg import remove  # type: ignore
-import io
+from __future__ import annotations
+
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from io import BytesIO
+from typing import List, Tuple, Callable, Awaitable, Optional
+
+from PIL import Image
+from rembg import remove, new_session  # type: ignore
+
+from domain.models.outfit import Outfit
 
 
 class OutfitImageRenderer:
     """
-    Адаптер, который умеет собирать картинку аутфита.
+    Обработка фото
     """
 
-    def __init__(self) -> None:
-        # сюда потом можно положить:
-        # - доступ к хранилищу картинок
-        # - настройки размеров
-        # - сервис удаления фона и т.п.
-        self.default_item_size = (350, 450)
-        self.canvas_bg_color = (255, 255, 255)  # белый цвет фона
-        pass
+    def __init__(
+        self,
+        max_workers: int = 2,
+        default_item_size: Tuple[int, int] = (280, 360),
+        canvas_bg_color: Tuple[int, int, int] = (255, 255, 255),
+    ) -> None:
+        self.default_item_size = default_item_size
+        self.canvas_bg_color = canvas_bg_color
+
+        self._session = new_session("u2net")
+        self._pool = ThreadPoolExecutor(max_workers=max_workers)
 
     async def render_outfit(
         self,
         outfit: Outfit,
         load_image: Callable[[str], Awaitable[Optional[Image.Image]]],
-        canvas_size: Tuple[int, int] = (1000, 1000),
+        canvas_size: Tuple[int, int] = (800, 800),
         layout: str = "grid",
     ) -> bytes:
-        """
-        Построить картинку аутфита по доменной модели.
+        coros = [load_image(item.image_id) for item in outfit.items]
+        loaded = await asyncio.gather(*coros, return_exceptions=True)
 
-        load_image(image_id) -> PIL.Image или None
-        """
         images: List[Image.Image] = []
-
-        for item in outfit.items:
-            img = await load_image(item.image_id)
-            if img is None:
+        for x in loaded:
+            if isinstance(x, Exception) or x is None:
                 continue
-            images.append(img)
+            images.append(x)  # type: ignore
 
         if not images:
-            img = Image.new("RGB", canvas_size, color=self.canvas_bg_color)
-            buf = BytesIO()
-            img.save(buf, format="PNG")
-            buf.seek(0)
-            return buf.getvalue()
+            return self._empty_png(canvas_size)
 
-        img = self.render_from_images(
-            images=images,
-            canvas_size=canvas_size,
-            bg_color=self.canvas_bg_color,
-            layout=layout,
-        )
+        processed = await asyncio.gather(*[
+            asyncio.get_running_loop().run_in_executor(
+                self._pool,
+                self._prepare_image_sync,
+                img,
+            )
+            for img in images
+        ])
+
+        processed = [p for p in processed if p is not None]
+        if not processed:
+            return self._empty_png(canvas_size)
+
+        canvas = Image.new("RGB", canvas_size, color=self.canvas_bg_color)
+        if layout == "grid":
+            canvas = self._layout_grid(canvas, processed)
+
         buf = BytesIO()
-        img.save(buf, format="PNG")
-        buf.seek(0)
+        canvas.save(buf, format="PNG")
         return buf.getvalue()
 
-    def render_from_images(
-        self,
-        images: List[Image.Image],
-        canvas_size: Tuple[int, int] = (1000, 1000),
-        bg_color: str | Tuple[int, int, int] = "white",
-        layout: str = "horizontal"
-    ) -> Image.Image:
-        """
-        Собрать картинку аутфита ТОЛЬКО по списку PIL.Image.
-        """
-        if not images:
-            return Image.new("RGB", canvas_size,
-                             color=self._parse_color(bg_color))
-        processed_images: list[Image.Image] = []
-        for img in images:
-            compressed_img = self._compress_image(img, self.default_item_size)
-            clean_img = self.delete_background(compressed_img)
-            processed_images.append(clean_img)
+    def _prepare_image_sync(self, img: Image.Image) -> Optional[Image.Image]:
+        try:
+            compressed = self._compress_image(img, self.default_item_size)
+            cleaned = self._delete_background_sync(compressed)
+            return cleaned
+        except Exception:
+            return None
 
-        bg_color_rgb = self._parse_color(bg_color)
-        canvas = Image.new("RGB", canvas_size, color=bg_color_rgb)
-
-        if layout == "grid":
-            return self._layout_grid(canvas, processed_images)
-
-        return canvas
-
-    def delete_background(self, image: Image.Image) -> Image.Image:
-        """
-        Удаляет фон с изображения
-        """
+    def _delete_background_sync(self, image: Image.Image) -> Image.Image:
         if image.mode != "RGBA":
             image = image.convert("RGBA")
 
-        buf = io.BytesIO()
+        buf = BytesIO()
         image.save(buf, format="PNG")
         input_bytes = buf.getvalue()
 
-        output_bytes: bytes = remove(input_bytes)  # type: ignore
+        output_bytes: bytes = remove(input_bytes,  # type: ignore
+                                     session=self._session)
+        return Image.open(BytesIO(output_bytes)).convert("RGBA")
 
-        result = Image.open(io.BytesIO(output_bytes)).convert("RGBA")
-        return result
+    # ---------- helpers ----------
+
+    def _empty_png(self, canvas_size: Tuple[int, int]) -> bytes:
+        img = Image.new("RGB", canvas_size, color=self.canvas_bg_color)
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        return buf.getvalue()
 
     def _compress_image(self, image: Image.Image,
                         target_size: Tuple[int, int]) -> Image.Image:
-        """
-        Сжимает изображение до целевого размера с сохранением пропорций.
-        """
         original_width, original_height = image.size
         target_width, target_height = target_size
         ratio = min(target_width / original_width,
                     target_height / original_height)
-        new_width = int(original_width * ratio)
-        new_height = int(original_height * ratio)
-        resized_image = image.resize((new_width, new_height),
-                                     Image.Resampling.LANCZOS)
-        return resized_image
+        new_width = max(1, int(original_width * ratio))
+        new_height = max(1, int(original_height * ratio))
+        return image.resize((new_width, new_height),
+                            Image.Resampling.BILINEAR)
 
     def _layout_grid(self, canvas: Image.Image, images: List[Image.Image],
                      cols: int = 2) -> Image.Image:
-        """
-        Расположить изображения в сетке.
-        """
         canvas_width, canvas_height = canvas.size
         rows = (len(images) + cols - 1) // cols
-        cell_width = self.default_item_size[0]
-        cell_height = self.default_item_size[1]
+        cell_width, cell_height = self.default_item_size
         padding = 20
+
         grid_width = cols * cell_width + (cols - 1) * padding
         grid_height = rows * cell_height + (rows - 1) * padding
         start_x = max(0, (canvas_width - grid_width) // 2)
         start_y = max(0, (canvas_height - grid_height) // 2)
+
         for i, img in enumerate(images):
             row = i // cols
             col = i % cols
@@ -140,23 +129,3 @@ class OutfitImageRenderer:
             canvas.paste(img, (img_x, img_y), img)
 
         return canvas
-
-    def _parse_color(self, color: str | Tuple[int, int, int]) \
-            -> Tuple[int, int, int]:
-        """
-        Преобразовать цвет в формат RGB.
-        """
-        if isinstance(color, str):
-            color_map = {
-                'white': (255, 255, 255),
-                'black': (0, 0, 0),
-                'red': (255, 0, 0),
-                'green': (0, 255, 0),
-                'blue': (0, 0, 255),
-                'gray': (128, 128, 128),
-                'grey': (128, 128, 128),
-                'lightgray': (211, 211, 211),
-                'lightgrey': (211, 211, 211),
-            }
-            return color_map.get(color.lower(), (255, 255, 255))
-        return color

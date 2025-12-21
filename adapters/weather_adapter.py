@@ -44,10 +44,18 @@ class OpenWeatherAdapter(WeatherRepository):
             evening=data['hour'][20]['temp_c']   # 20:00
         )
 
-        is_rain: bool = True if max(h['chance_of_rain']
-                                    for h in data['hour']) >= 50 else False
-        is_snow: bool = True if max(h['chance_of_snow']
-                                    for h in data['hour']) >= 50 else False
+        avg_rain = sum(
+            int(h.get("chance_of_rain", 0)) for h in data["hour"]
+        ) / len(data["hour"])
+
+        is_rain = avg_rain >= 50
+        avg_snow = sum(
+            int(h.get("chance_of_snow", 0)) for h in data["hour"]
+        ) / len(data["hour"])
+
+        is_snow = (
+            avg_snow >= 50
+            and min(h["temp_c"] for h in data["hour"]) <= 1)
         is_sleet: bool = any("sleet" in h["condition"]["text"].lower()
                              for h in data['hour'])
         is_storm: bool = any("thunder" in h["condition"]["text"].lower() and
@@ -56,7 +64,10 @@ class OpenWeatherAdapter(WeatherRepository):
         is_windy: bool = True if data['day']['maxwind_kph'] >= 25 else False
         is_uv_high: bool = True if max(h['uv']
                                        for h in data['hour']) >= 5 else False
-        is_humid: bool = True if data['day']['avghumidity'] >= 80 else False
+        day_hours = data["hour"][10:18]
+        avg_day_humidity = sum(h["humidity"]
+                               for h in day_hours) / len(day_hours)
+        is_humid = avg_day_humidity >= 75
         is_sunny: bool = any("sunny" in h["condition"]["text"].lower() or
                              "clear" in h["condition"]["text"].lower()
                              for h in data['hour'])

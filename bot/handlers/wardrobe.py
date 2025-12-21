@@ -55,16 +55,7 @@ async def wardrobe_open(cb: CallbackQuery, state: FSMContext,
             await cb.message.answer(
                 "Добро пожаловать в гардероб 🧥!\n"
                 "Что будем делать?",
-                reply_markup=kb([
-                    [RenderButton("Просмотреть вещи", "wardrobe:watch")],
-                    [RenderButton("➕ Добавить вещь", "wardrobe:add")],
-                    [RenderButton("✏️ Изменить вещь", "wardrobe:update")],
-                    [RenderButton("🗑 Удалить вещь", "wardrobe:delete")],
-                    [
-                        RenderButton("🏠 Меню", "menu:home"),
-                        RenderButton("⚙️ Настройки", "prefs:open"),
-                    ],
-                ])
+                reply_markup=wardrobe_keyboards.WardrobeKeyboard
             )
             await cb.answer()
             return
@@ -120,7 +111,9 @@ async def wardrobe_add(cb: CallbackQuery, state: FSMContext):
     await state.update_data(mode="add")
     if cb.message is not None:
         await cb.message.answer("Как назовём вещь?"
-                                "(например: «Белая рубашка»)")
+                                "(например: «Белая рубашка»)",
+                                reply_markup=kb([[RenderButton(
+                                    "❌ Отмена", "wardrobe:add:cancel")]]))
     await cb.answer()
 
 
@@ -150,7 +143,12 @@ async def item_edit(cb: CallbackQuery, state: FSMContext,
         item = repo.get_item(user_id=cb.from_user.id, item_id=item_id)
 
         if not item:
-            await cb.answer("Вещь не найдена 😔", show_alert=True)
+            if cb.message is not None:
+                await cb.message.answer("Вещь не найдена 😔", show_alert=True,
+                                        reply_markup=kb([[RenderButton(
+                                            "❌ Отмена",
+                                            "wardrobe:add:cancel")]]))
+            await cb.answer()
             return
 
         # сохраняем item_id + текущие данные

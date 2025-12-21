@@ -1,5 +1,5 @@
 import random
-from typing import List, Optional
+from typing import List, Optional, ClassVar
 
 from domain.models.outfit import Outfit
 from commands.daily_recommendation import DailyRecommendationResult
@@ -17,7 +17,7 @@ class DailyRecommendationRenderer:
     - outfit (если есть)
     """
 
-    WISHES: List[str] = [
+    WISHES: ClassVar[List[str]] = [
         "Пусть день будет лёгким и удачным ✨",
         "Сегодня ты — главный герой 💅",
         "Пусть всё сложится ровно так, как тебе нужно 🌿",
@@ -27,6 +27,52 @@ class DailyRecommendationRenderer:
         "Сегодня — день маленьких побед 🏆",
         "Пусть настроение держится крепко весь день 🌈",
     ]
+
+    TAKE_WITH_TEXT: ClassVar[dict[str, str]] = {
+        "головной убор":
+            "🧢 <b>Головной убор</b> — защитит от солнца и перегрева",
+
+        "солнцезащитные очки":
+            "🕶 <b>Солнцезащитные очки</b> — комфорт и стиль в одном флаконе",
+
+        "SPF":
+            "🧴 <b>SPF</b> — <i>обязателен</i> при активном солнце",
+
+        "зонт":
+            "☂️ <b>Зонт</b> — вдруг небо решит поплакать",
+
+        "дождевик":
+            "🌧 <b>Дождевик</b> — дождь не повод портить образ",
+
+        "ветровка":
+            "💨 <b>Ветровка</b> — спасёт от порывов ветра",
+
+        "шапка":
+            "⛄️ <b>Шапка</b> — чтобы было тепло и уютно",
+
+        "шарф":
+            "🧣 <b>Шарф</b> — защита для шеи",
+
+        "перчатки/варежки":
+            "🧤 <b>Перчатки или варежки</b> — руки скажут спасибо",
+
+        "легкая непромокаемая куртка":
+            "🧥 <b>Непромокаемая куртка</b> — <i>идеальна для влажной"
+            " и сырой погоды</i>",
+
+        "светоотражающие элементы":
+            "✨ <b>Светоотражающие элементы</b> — сегодня туманно,"
+            " так заметнее и безопаснее",
+
+        "легкая куртка":
+            "🧥 <b>Лёгкая куртка</b> — вечером станет прохладнее",
+
+        "легкая кофта":
+            "🧶 <b>Лёгкая кофта</b> — накинуть после заката",
+
+        "куртка":
+            "🧥 <b>Куртка</b> — пригодится ближе к вечеру",
+            }
 
     def render(self, result: DailyRecommendationResult) -> RenderMessage:
         # ошибки use-case
@@ -82,7 +128,7 @@ class DailyRecommendationRenderer:
         st = result.style_used.value if result.style_used else "any"
 
         if not w:
-            return f"Ежедневная рекомендация\nСтиль: {st}"
+            return f"ЕЖЕДНЕВНАЯ РЕКОМЕНДАЦИЯ\nСтиль: {st}"
 
         icons: List[str] = []
         if getattr(w, "is_rain", False):
@@ -97,39 +143,45 @@ class DailyRecommendationRenderer:
         dt = w.required_date
         date_str = dt.isoformat() if hasattr(dt, "isoformat") else ""
 
-        t_m = getattr(w, "temp_morning", "")
-        t_d = getattr(w, "temp_day", "")
-        t_e = getattr(w, "temp_evening", "")
+        t_m = w.temp_morning
+        t_d = w.temp_day
+        t_e = w.temp_evening
 
         return (
-            f"{city} · {date_str}\n"
-            f"{icons_str}🌡 {t_m}° утром · {t_d}° днём · {t_e}° вечером\n"
-            f"Стиль: {st}"
-        ).strip()
+            f"<i>{city} • {date_str.replace('-', '.')}</i>\n\n"
+            f"<b>Осадки:</b> {icons_str}\n\n"
+            f"<blockquote>"
+            f"☀️ <b>Утро:</b> {t_m}°\n"
+            f"⛅️ <b>День:</b> {t_d}°\n"
+            f"🌙 <b>Вечер:</b> {t_e}°"
+            f"</blockquote>\n\n"
+            f"<b>Стиль:</b> {st}"
+            )
 
     def _render_wish(self) -> str:
-        return f"**Пожелание дня:** {random.choice(self.WISHES)}"
+        return '<b>Пожелание на день:</b>\n' + \
+                f'<i>{random.choice(self.WISHES)}</i>'
 
     def _render_take_with(self, result: DailyRecommendationResult) -> str:
         tw = result.take_with
-        if not tw or not getattr(tw, "items", None):
+        if not tw or not tw.items:
             return ""
 
-        items = [str(x).strip() for x in tw.items if str(x).strip()]
-        if not items:
-            return ""
+        lines = ["<b>Что взять с собой 👜:</b>"]
+        for key in tw.items:
+            text = self.TAKE_WITH_TEXT.get(key, f"• {key}")
+            lines.append(f"• {text}")
 
-        lines = ["**Взять с собой:**"] + [f"• {x}" for x in items]
         return "\n".join(lines)
 
     def _render_outfit_optional(self, outfit: Optional[Outfit]) -> str:
         if outfit is None:
             return ""
 
-        lines: List[str] = ["**Лук дня**"]
+        lines: List[str] = ["<blockquote>Aутфит для тебя!💋 </blockquote>\n"]
         for item in outfit.items:
             lines.append(
-                f"• {item.category.value}: {item.subtype.value}"
-                f" · {item.style.value} · {item.main_color.value}"
+                f"•<b>{item.name}:</b> "
+                f"{item.style.value} · {item.main_color.value}"
             )
         return "\n".join(lines)

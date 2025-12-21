@@ -12,6 +12,7 @@ async def menu(cb: CallbackQuery, state: FSMContext):
     await state.clear()
     if cb.message is not None:
         await cb.message.answer(
-                    "🏠 Меню",
-                    reply_markup=menu_keyboards.MenuKeyboard)
+                    "🏠 <b>Меню</b>",
+                    reply_markup=menu_keyboards.MenuKeyboard,
+                    parse_mode="HTML")
     await cb.answer()

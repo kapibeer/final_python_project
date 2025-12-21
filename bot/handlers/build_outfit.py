@@ -12,10 +12,10 @@ from aiogram.types import BufferedInputFile
 from infra.container import Container
 
 from bot.keyboards import outfit_keyboards
-from bot.io.load_tg_image import LoaderTgImage
+from bot.helpers.load_tg_image import LoaderTgImage
 
 from adapters.telegram_adapters.renderers.build_outfit_renderer \
-    import OutfitBuildRenderer
+    import OutfitBuildRenderer, renderer_like
 from adapters.data_adapters.outfit_image_renderer import OutfitImageRenderer
 
 from domain.models.user import User
@@ -36,9 +36,10 @@ class OutfitBuild(StatesGroup):
 
 def _build_intro_text() -> str:
     return (
-        "Давай подберем тебе аутфит! ✨\n\n"
-        "Если хочешь поменять дату, стиль или город — нажми кнопку ниже 🌸\n"
-        "Учти: мы не можем спрогнозировать погоду дальше чем на две недели!"
+        "<b>Давай подберем тебе аутфит!</b> ✨\n\n"
+        "Если хочешь поменять дату, стиль или город — нажми кнопку ниже 🌸\n\n"
+        "<blockquote>учти: мы не можем спрогнозировать"
+        " погоду дальше чем на две недели!</blockquote>"
     )
 
 
@@ -69,12 +70,12 @@ async def outfit_build(cb: CallbackQuery, state: FSMContext,
         await cb.message.answer(
             text=_build_intro_text(),
             reply_markup=outfit_keyboards.EditKeyboard,
+            parse_mode="HTML"
         )
     await cb.answer()
 
 
-# --------- EDIT LOCATION ---------
-
+# LOCATION
 @router.callback_query(F.data == "outfit:edit:location")
 async def outfit_edit_location(cb: CallbackQuery, state: FSMContext):
     await state.set_state(OutfitBuild.outfit_location)
@@ -83,7 +84,6 @@ async def outfit_edit_location(cb: CallbackQuery, state: FSMContext):
     await cb.answer()
 
 
-# LOCATION
 @router.message(OutfitBuild.outfit_location)
 async def outfit_location_msg(msg: Message, state: FSMContext,
                               container: Container):
@@ -113,7 +113,7 @@ async def outfit_edit_style(cb: CallbackQuery, state: FSMContext):
     if cb.message is not None:
         await cb.message.answer(
             "Выбери стиль:",
-            reply_markup=outfit_keyboards.StyleKeyboard,
+            reply_markup=outfit_keyboards.StyleKeyboard
         )
     await cb.answer()
 
@@ -143,7 +143,7 @@ async def outfit_edit_date(cb: CallbackQuery, state: FSMContext):
             "Выбери дату:\n"
             "• Напиши в формате YYYY-MM-DD (например 2025-12-21)\n"
             "• или нажми быстрые кнопки:",
-            reply_markup=outfit_keyboards.DateQuickKeyboard,
+            reply_markup=outfit_keyboards.DateQuickKeyboard
         )
     await cb.answer()
 
@@ -180,13 +180,15 @@ async def outfit_date_msg(msg: Message, state: FSMContext,
         target = date.fromisoformat(raw)
     except Exception:
         await msg.answer("Неверный формат 😔"
-                         " Напиши YYYY-MM-DD, например 2025-12-21")
+                         " Напиши YYYY-MM-DD, например 2025-12-21",
+                         reply_markup=outfit_keyboards.DateQuickKeyboard)
         return
 
     # проверка на диапазон
     today = date.today()
     if target < today or target > today + timedelta(days=13):
-        await msg.answer("Я могу смотреть погоду только на 14 дней вперёд 😔")
+        await msg.answer("Я могу смотреть погоду только на 14 дней вперёд 😔",
+                         reply_markup=outfit_keyboards.DateQuickKeyboard)
         return
 
     data = await state.get_data()
@@ -202,7 +204,7 @@ async def outfit_date_msg(msg: Message, state: FSMContext,
     await state.update_data(outfit_date=target.isoformat())
     await state.set_state(None)
     await msg.answer("✅ Дата обновлена!",
-                     reply_markup=outfit_keyboards.EditKeyboard)
+                     reply_markup=outfit_keyboards.EditKeyboard,)
 
 
 # GEN
@@ -237,7 +239,7 @@ async def outfit_gen(cb: CallbackQuery, state: FSMContext,
         style = Style(style_raw) if style_raw else None
     except Exception:
         style = Style.CASUAL
-
+    await state.update_data(target_style=style)
     weather_repo = container.weather_repo()
     weather: Optional[WeatherSnap] = \
         weather_repo.get_weather(required_date=target_date, city=city)
@@ -269,12 +271,14 @@ async def outfit_gen(cb: CallbackQuery, state: FSMContext,
                 photo=BufferedInputFile(image_rendered, filename="outfit.png"),
                 caption=rendered.text,
                 reply_markup=rendered.keyboard,
+                parse_mode="HTML"
             )
             await cb.answer()
             return
     if cb.message is not None:
         await cb.message.answer(text=rendered.text,
-                                reply_markup=rendered.keyboard)
+                                reply_markup=rendered.keyboard,
+                                parse_mode="HTML")
     await cb.answer()
 
 
@@ -302,12 +306,14 @@ async def outfit_next(cb: CallbackQuery, state: FSMContext,
                 photo=BufferedInputFile(image_rendered, filename="outfit.png"),
                 caption=rendered.text,
                 reply_markup=rendered.keyboard,
+                parse_mode="HTML"
             )
             await cb.answer()
             return
     if cb.message is not None:
         await cb.message.answer(text=rendered.text,
-                                reply_markup=rendered.keyboard)
+                                reply_markup=rendered.keyboard,
+                                parse_mode="HTML")
     await cb.answer()
 
 
@@ -315,8 +321,11 @@ async def outfit_next(cb: CallbackQuery, state: FSMContext,
 @router.callback_query(F.data == "outfit:like")
 async def menu(cb: CallbackQuery, state: FSMContext):
     await state.clear()
+    data = await state.get_data()
+    style: Style = data.get("target_style") or Style.CASUAL
     if cb.message is not None:
         await cb.message.answer(
-                    "Рада, что тебе понравилось 💞",
-                    reply_markup=outfit_keyboards.LikeKeyboard)
+                    renderer_like(style=style),
+                    reply_markup=outfit_keyboards.LikeKeyboard,
+                    parse_mode="HTML")
     await cb.answer()

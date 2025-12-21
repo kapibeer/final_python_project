@@ -435,7 +435,7 @@ class OutfitBuilder:
         weather_coldness: int,
         item_scores: Dict[int, float],
         lambda_color: float = 0.5,
-        lambda_outerwear: float = 0.3
+        lambda_outerwear: float = 0.2
     ) -> float:
         """
         Итоговый скор аутфита:

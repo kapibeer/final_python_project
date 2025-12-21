@@ -6,6 +6,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from infra.container import Container
 from infra.database import make_session_factory, make_engine  # type: ignore
+from infra.sheduler import setup_scheduler
 
 from adapters.database_adapters.models.base import Base
 
@@ -16,8 +17,8 @@ from bot.handlers.start import router as start_router
 from bot.handlers.wardrobe import router as wardrobe_router
 from bot.handlers.menu import router as menu_router
 from bot.handlers.preferences import router as prefs_router
-from bot.handlers.season_mailing import router as season_router
 from bot.handlers.build_outfit import router as outfit_router
+from bot.handlers.daily_recommendation import router as daily_router
 
 
 async def main():
@@ -30,14 +31,16 @@ async def main():
     Base.metadata.create_all(bind=engine)
 
     container = Container(session_factory=session_factory)
-    dp = Dispatcher(storage=MemoryStorage())
+
+    scheduler = setup_scheduler(bot, container)
+    scheduler.start()
 
     dp.include_router(start_router)
     dp.include_router(wardrobe_router)
     dp.include_router(menu_router)
     dp.include_router(prefs_router)
-    dp.include_router(season_router)
     dp.include_router(outfit_router)
+    dp.include_router(daily_router)
 
     await dp.start_polling(bot, container=container)  # type: ignore
 

@@ -6,6 +6,17 @@ from typing import List
 from aiogram.types import InlineKeyboardMarkup
 
 
+WardrobeKeyboard = kb([
+                    [RenderButton("Просмотреть вещи", "wardrobe:watch")],
+                    [RenderButton("➕ Добавить вещь", "wardrobe:add")],
+                    [RenderButton("✏️ Изменить вещь", "wardrobe:update")],
+                    [RenderButton("🗑 Удалить вещь", "wardrobe:delete")],
+                    [
+                        RenderButton("🏠 Меню", "menu:home"),
+                        RenderButton("⚙️ Настройки", "prefs:open"),
+                    ],
+                ])
+
 # -----------------------------
 # CATEGORY
 # -----------------------------

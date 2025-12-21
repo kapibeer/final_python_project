@@ -73,7 +73,7 @@ class DailyRecommendation:
                 user=user,
                 wardrobe=wardrobe,
                 weather=weather,
-                style=None,
+                style=user.favourite_style,
                 count_max=1,
             )
             outfit = None
@@ -102,7 +102,8 @@ class DailyRecommendation:
                 message_key="success",
                 take_with=take_with,
                 outfit=outfit,
-                weather=weather_summary
+                weather=weather_summary,
+                style_used=user.favourite_style
             )
         return DailyRecommendationResult(
                 success=False,
