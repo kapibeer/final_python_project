@@ -76,11 +76,13 @@ class SeasonMailingRenderer:
 
         text = self._render_text(result.season)
 
-        buttons = [
-            [RenderButton("🧥 Подобрать лук", "outfit:build")],
-            [RenderButton("🧥 Гардероб", "wardrobe:open"),
-             RenderButton("🏠 Меню", "menu:home")],
-        ]
+        buttons = [[RenderButton("✨ Подобрать лук", "outfit:build")],
+                   [RenderButton("🌟 Получить рекомендацию на сегодня",
+                                 "daily:build")],
+                   [
+                    RenderButton("🧥 Гардероб", "wardrobe:open"),
+                    RenderButton("⚙️ Настройки", "prefs:open"),
+                    ]]
 
         return RenderMessage(text=text, buttons=buttons)
 

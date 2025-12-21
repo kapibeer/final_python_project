@@ -1,8 +1,7 @@
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
-from adapters.telegram_adapters.renderers.types import RenderButton
-from bot.keyboards.keyboard_helper import kb
+from bot.keyboards import menu_keyboards
 
 
 router = Router()
@@ -14,11 +13,5 @@ async def menu(cb: CallbackQuery, state: FSMContext):
     if cb.message is not None:
         await cb.message.answer(
                     "🏠 Меню",
-                    reply_markup=kb([
-                        [RenderButton("✨ Подобрать лук", "outfit:build")],
-                        [RenderButton("🌟 Получить рекомендацию на сегодня",
-                                      "daily:build")],
-                        [
-                            RenderButton("🧥 Гардероб", "wardrobe:open"),
-                            RenderButton("⚙️ Настройки", "prefs:open"),
-                        ]]))
+                    reply_markup=menu_keyboards.MenuKeyboard)
+    await cb.answer()

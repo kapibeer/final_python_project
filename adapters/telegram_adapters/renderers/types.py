@@ -22,7 +22,6 @@ class RenderButton:
 class RenderMessage:
     text: str
     buttons: Optional[Sequence[Sequence[RenderButton]]] = None
-    image_bytes: Optional[bytes] = None
 
     keyboard: Optional[InlineKeyboardMarkup] = field(init=False)
 

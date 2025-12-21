@@ -220,4 +220,6 @@ def UserItemsKeyboard(user_id: int, wardrobe_repo: WardrobeRepository,
     for item in wardrobe:
         buttons.append([RenderButton(item.name,
                                      f"item:{action}:{item.item_id}")])
+    buttons.append([RenderButton("🏠 Меню", "menu:home")])
+    buttons.append([RenderButton("🧥 Гардероб", "wardrobe:open")])
     return kb(buttons)

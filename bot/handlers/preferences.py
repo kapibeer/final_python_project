@@ -37,7 +37,7 @@ class Prefs(StatesGroup):
 
 
 @router.callback_query(F.data == "prefs:open")
-async def start(cb: CallbackQuery, state: FSMContext, container: Container):
+async def prefs(cb: CallbackQuery, state: FSMContext, container: Container):
     await state.clear()
 
     user_repo = container.user_repo()
@@ -50,14 +50,13 @@ async def start(cb: CallbackQuery, state: FSMContext, container: Container):
         if cb.message is not None:
             await cb.message.answer(text=text,
                                     reply_markup=prefs_keyboards.PrefsKeyboard)
-            await cb.answer()
     else:
         if cb.message is not None:
             await cb.message.answer(
                 "Не могу тебя найти, давай зарегистрируемся!\n\n"
                 "Введи команду /start",
             )
-            await cb.answer()
+    await cb.answer()
 
 
 # GENDER
@@ -74,7 +73,7 @@ async def gender(cb: CallbackQuery, state: FSMContext):
                     ]
                 ])
             )
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(Prefs.edit_gender,
@@ -95,7 +94,7 @@ async def gender_edit(cb: CallbackQuery, state: FSMContext,
                 text=renderered.text,
                 reply_markup=renderered.keyboard
             )
-        await cb.answer()
+    await cb.answer()
 
 
 # AGE
@@ -104,7 +103,7 @@ async def age(cb: CallbackQuery, state: FSMContext):
     await state.set_state(Prefs.edit_age)
     if cb.message is not None:
         await cb.message.answer("Сколько тебе лет?")
-        await cb.answer()
+    await cb.answer()
 
 
 @router.message(Prefs.edit_age)
@@ -134,7 +133,7 @@ async def location(cb: CallbackQuery, state: FSMContext):
     if cb.message is not None:
         await cb.message.answer("В каком ты городе?\n"
                                 "Напиши название на английском")
-        await cb.answer()
+    await cb.answer()
 
 
 @router.message(Prefs.edit_location)
@@ -169,7 +168,7 @@ async def notif_time(cb: CallbackQuery, state: FSMContext):
     if cb.message is not None:
         await cb.message.answer("Во сколько ты хочешь получать уведомления?\n"
                                 "Напиши в формате HH:MM")
-        await cb.answer()
+    await cb.answer()
 
 
 @router.message(Prefs.edit_notification_time)
@@ -210,7 +209,7 @@ async def cold(cb: CallbackQuery, state: FSMContext):
                 ]
             )
         )
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(Prefs.edit_cold,
@@ -232,7 +231,7 @@ async def cold_edit(cb: CallbackQuery, state: FSMContext,
                 text=renderered.text,
                 reply_markup=renderered.keyboard
             )
-        await cb.answer()
+    await cb.answer()
 
 
 # STYLE
@@ -258,7 +257,7 @@ async def style(cb: CallbackQuery, state: FSMContext):
                     ],
                 ])
             )
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(Prefs.edit_style,
@@ -279,7 +278,7 @@ async def style_edit(cb: CallbackQuery, state: FSMContext,
                 text=renderered.text,
                 reply_markup=renderered.keyboard
             )
-        await cb.answer()
+    await cb.answer()
 
 
 # DAILY NOTIFICATIONS
@@ -296,7 +295,7 @@ async def notifications(cb: CallbackQuery, state: FSMContext):
                     ],
                 ])
             )
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(Prefs.edit_notifications,
@@ -317,7 +316,7 @@ async def notifications_edit(cb: CallbackQuery, state: FSMContext,
                 text=renderered.text,
                 reply_markup=renderered.keyboard
             )
-        await cb.answer()
+    await cb.answer()
 
 
 # SEASON NOTIFICATIONS
@@ -336,7 +335,7 @@ async def season(cb: CallbackQuery, state: FSMContext):
                     ],
                 ])
             )
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(Prefs.edit_season_notifications,
@@ -358,4 +357,4 @@ async def season_edit(cb: CallbackQuery, state: FSMContext,
                 text=renderered.text,
                 reply_markup=renderered.keyboard
             )
-        await cb.answer()
+    await cb.answer()

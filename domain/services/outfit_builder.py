@@ -2,6 +2,7 @@ from typing import List, Optional, Tuple, Dict, Any
 from domain.models.outfit import Outfit
 from domain.models.weather_snap import WeatherSnap
 from domain.models.user import User
+from domain.models.clothing_item import WarmthLevel
 from domain.models.clothing_item import ClothingItem, Style, \
     Color, ClothingCategory, TopGroup
 from domain.services.item_recommender import ItemRecommender
@@ -249,6 +250,23 @@ WEATHER_TEMPLATES: dict[int, list[Template]] = {
 }
 
 
+WARMTH_VALUE: dict[WarmthLevel, int] = {
+    WarmthLevel.LIGHT: 1,
+    WarmthLevel.MEDIUM: 2,
+    WarmthLevel.WARM: 3,
+    WarmthLevel.VERY_WARM: 4,
+}
+
+
+# какая “норма” по теплоте outerwear для каждой холодности
+OUTERWEAR_TARGET_WARMTH: dict[int, int] = {
+    1: 1,  # HOT -> максимум легкое
+    2: 2,  # MILD -> medium
+    3: 3,  # COLD -> warm
+    4: 4,  # VERY COLD -> very_warm
+}
+
+
 class OutfitBuilder:
     """
     Доменный сервис: собирает аутфиты по шаблонам,
@@ -346,7 +364,8 @@ class OutfitBuilder:
         # средний ML-скор по вещам + бонус за цветовую гармонию
         scored_outfits: List[Tuple[Outfit, float]] = []
         for outfit in candidates:
-            score = self._score_outfit(outfit, item_scores)
+            score = self._score_outfit(outfit=outfit, item_scores=item_scores,
+                                       weather_coldness=weather_coldness)
             scored_outfits.append((outfit, score))
 
         scored_outfits.sort(key=lambda x: x[1], reverse=True)
@@ -413,8 +432,10 @@ class OutfitBuilder:
     def _score_outfit(
         self,
         outfit: Outfit,
+        weather_coldness: int,
         item_scores: Dict[int, float],
         lambda_color: float = 0.5,
+        lambda_outerwear: float = 0.3
     ) -> float:
         """
         Итоговый скор аутфита:
@@ -427,6 +448,24 @@ class OutfitBuilder:
         ml_scores = [item_scores.get(i.item_id, 0.0) for i in outfit.items]
         base_ml = sum(ml_scores) / len(ml_scores)
 
+        outerwear_penalty = 0.0
+        for it in outfit.items:
+            outerwear_penalty += \
+                self._outerwear_warmth_penalty(weather_coldness, it)
+
         color_score = color_harmony_score(outfit.items)
 
-        return base_ml + lambda_color * color_score
+        return base_ml + lambda_color * color_score \
+            - lambda_outerwear * outerwear_penalty
+
+    def _outerwear_warmth_penalty(self, weather_coldness: int,
+                                  item: ClothingItem) -> float:
+        if item.category != ClothingCategory.OUTERWEAR:
+            return 0.0
+
+        target = OUTERWEAR_TARGET_WARMTH.get(weather_coldness, 2)
+        actual = WARMTH_VALUE.get(item.warmth_level, 2)
+
+        diff = actual - target
+        penalty_per_step = 0.35
+        return penalty_per_step * abs(diff)

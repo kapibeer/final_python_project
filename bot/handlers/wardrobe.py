@@ -9,7 +9,7 @@ from domain.models.clothing_item import (ClothingCategory, ClothingItem,
                                          WarmthLevel)
 from commands.manage_wardrobe import ManageWardrobe, ManageWardrobeResult
 from adapters.telegram_adapters.renderers.wardrobe_renderer \
-    import ManageWardrobeRenderer, item_summary
+    import ManageWardrobeRenderer, item_summary, item_summary_domain
 from adapters.telegram_adapters.renderers.types import RenderButton
 from infra.container import Container
 from bot.keyboards.keyboard_helper import kb, text_kb
@@ -56,6 +56,7 @@ async def wardrobe_open(cb: CallbackQuery, state: FSMContext,
                 "Добро пожаловать в гардероб 🧥!\n"
                 "Что будем делать?",
                 reply_markup=kb([
+                    [RenderButton("Просмотреть вещи", "wardrobe:watch")],
                     [RenderButton("➕ Добавить вещь", "wardrobe:add")],
                     [RenderButton("✏️ Изменить вещь", "wardrobe:update")],
                     [RenderButton("🗑 Удалить вещь", "wardrobe:delete")],
@@ -72,7 +73,44 @@ async def wardrobe_open(cb: CallbackQuery, state: FSMContext,
             "Не могу тебя найти, давай зарегистрируемся!\n\n"
             "Введи команду /start",
         )
-        await cb.answer()
+    await cb.answer()
+
+
+@router.callback_query(F.data == "wardrobe:watch")
+async def wardrobe_watch(cb: CallbackQuery, state: FSMContext,
+                         container: Container):
+    await state.clear()
+    wardrobe_repo = container.wardrobe_repo()
+    if cb.message is not None:
+        await cb.message.answer(text="Твои вещи 🌺",
+                                reply_markup=wardrobe_keyboards.
+                                UserItemsKeyboard(user_id=cb.from_user.id,
+                                                  action="watch",
+                                                  wardrobe_repo=wardrobe_repo))
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("item:watch:"))
+async def item_watch(cb: CallbackQuery, state: FSMContext,
+                     container: Container):
+    if cb.data is not None:
+        item_id = int(cb.data.split(":")[-1])
+        repo = container.wardrobe_repo()
+        item = repo.get_item(user_id=cb.from_user.id, item_id=item_id)
+        if item is not None and cb.message is not None:
+            summary = item_summary_domain(item)
+            keyboard = kb([[RenderButton("✏️ Изменить вещь",
+                                         f"item:edit:{item_id}")],
+                           [RenderButton("🗑 Удалить вещь",
+                                         f"item:delete:{item_id}")],
+                           [RenderButton("🏠 Меню", "menu:home"),
+                            RenderButton("🧥 Гардероб",
+                                         "wardrobe:open")
+                            ]])
+            await cb.message.answer_photo(photo=item.image_id,
+                                          caption=summary,
+                                          reply_markup=keyboard)
+    await cb.answer()
 
 
 @router.callback_query(F.data == "wardrobe:add")
@@ -83,7 +121,7 @@ async def wardrobe_add(cb: CallbackQuery, state: FSMContext):
     if cb.message is not None:
         await cb.message.answer("Как назовём вещь?"
                                 "(например: «Белая рубашка»)")
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(F.data == "wardrobe:update")
@@ -99,7 +137,7 @@ async def wardrobe_update(cb: CallbackQuery, state: FSMContext,
                 wardrobe_repo=container.wardrobe_repo(),
                 action="edit")
         )
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(F.data.startswith("item:edit:"))
@@ -137,7 +175,7 @@ async def item_edit(cb: CallbackQuery, state: FSMContext,
                 "Напиши новое название или нажми «Оставить как есть»",
                 reply_markup=text_kb("Оставить как есть")
             )
-            await cb.answer()
+    await cb.answer()
 
 
 @router.message(ClothingItemSetup.name)
@@ -189,7 +227,7 @@ async def item_category(cb: CallbackQuery, state: FSMContext):
                     "Выбери подкатегорию:",
                     reply_markup=wardrobe_keyboards.BottomSubtypeKeyboard
                 )
-                await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(ClothingItemSetup.subtype,
@@ -203,7 +241,7 @@ async def item_subtype(cb: CallbackQuery, state: FSMContext):
                 "Выбери цвет:",
                 reply_markup=wardrobe_keyboards.ColorKeyboard
             )
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(ClothingItemSetup.main_color,
@@ -217,7 +255,7 @@ async def item_color(cb: CallbackQuery, state: FSMContext):
                 "Выбери стиль:",
                 reply_markup=wardrobe_keyboards.StyleKeyboard
             )
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(ClothingItemSetup.style,
@@ -231,7 +269,7 @@ async def item_style(cb: CallbackQuery, state: FSMContext):
                 "Выбери насколько вещь теплая:",
                 reply_markup=wardrobe_keyboards.WarmthKeyboard
             )
-        await cb.answer()
+    await cb.answer()
 
 
 async def ask_image_in_edit(cb: CallbackQuery, state: FSMContext,
@@ -254,7 +292,7 @@ async def ask_image_in_edit(cb: CallbackQuery, state: FSMContext,
                 RenderButton("👌 Оставить как есть", "item:image:keep"),
             ]])
         )
-        await cb.answer()
+    await cb.answer()
 
 
 async def ask_image_in_add(
@@ -288,7 +326,6 @@ async def item_warmth(cb: CallbackQuery, state: FSMContext):
                     "Вещь водонепроницаемая?",
                     reply_markup=wardrobe_keyboards.YesNoKeyboard
                 )
-            await cb.answer()
         else:
             await state.set_state(ClothingItemSetup.image_id)
             await state.update_data(is_waterproof=False, is_windproof=False)
@@ -302,6 +339,7 @@ async def item_warmth(cb: CallbackQuery, state: FSMContext):
                     state,
                     image_id=data["image_id"]
                 )
+    await cb.answer()
 
 
 @router.callback_query(ClothingItemSetup.is_waterproof,
@@ -317,7 +355,7 @@ async def item_waterproof(cb: CallbackQuery, state: FSMContext):
                     "Вещь ветрозащитная?",
                     reply_markup=wardrobe_keyboards.YesNoKeyboard
                 )
-            await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(ClothingItemSetup.is_windproof,
@@ -337,6 +375,7 @@ async def item_windproof(cb: CallbackQuery, state: FSMContext):
                 state,
                 image_id=data["image_id"]
             )
+    await cb.answer()
 
 
 @router.message(
@@ -393,7 +432,7 @@ async def item_image_change(cb: CallbackQuery, state: FSMContext):
     if cb.message is not None:
         await state.update_data(awaiting_new_image=True)
         await cb.message.answer("Ок, пришли новое фото (или файл).")
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(ClothingItemSetup.image_id, F.data == "item:image:keep")
@@ -428,7 +467,7 @@ async def item_image_keep(cb: CallbackQuery, state: FSMContext):
                 RenderButton("❌ Отмена", "wardrobe:add:cancel"),
             ]])
         )
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(
@@ -480,7 +519,7 @@ async def item_confirm(cb: CallbackQuery, state: FSMContext,
             rendered.text,
             reply_markup=rendered.keyboard
         )
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(F.data == "wardrobe:delete")
@@ -492,7 +531,7 @@ async def delete(cb: CallbackQuery, container: Container):
                 user_id=cb.from_user.id,
                 wardrobe_repo=container.wardrobe_repo(), action="delete")
         )
-        await cb.answer()
+    await cb.answer()
 
 
 @router.callback_query(F.data.startswith("item:delete:"))
@@ -515,4 +554,4 @@ async def delete_item(cb: CallbackQuery, container: Container):
             rendered.text,
             reply_markup=rendered.keyboard
         )
-        await cb.answer()
+    await cb.answer()

@@ -80,7 +80,7 @@ async def gender_start(cb: CallbackQuery, state: FSMContext):
         await state.set_state(PrefsSetup.age)
         if cb.message is not None:
             await cb.message.answer("Сколько тебе лет?")
-            await cb.answer()
+    await cb.answer()
 
 
 # AGE
@@ -148,7 +148,7 @@ async def cold_start(cb: CallbackQuery, state: FSMContext):
                     ],
                 ])
             )
-            await cb.answer()
+    await cb.answer()
 
 
 # STYLE
@@ -169,7 +169,7 @@ async def style_start(cb: CallbackQuery, state: FSMContext):
                     ]
                 ])
             )
-            await cb.answer()
+    await cb.answer()
 
 
 # DAILY NOTIFICATIONS
@@ -191,7 +191,7 @@ async def notifications_start(cb: CallbackQuery, state: FSMContext):
                     ]
                 ])
             )
-            await cb.answer()
+    await cb.answer()
 
 
 # SEASON NOTIFICATIONS
@@ -208,7 +208,7 @@ async def season_start(cb: CallbackQuery, state: FSMContext):
                 "Во сколько присылать уведомления?\n"
                 "Напиши в формате: HH:MM (например 09:30)"
             )
-            await cb.answer()
+    await cb.answer()
 
 
 # TIME + SAVE

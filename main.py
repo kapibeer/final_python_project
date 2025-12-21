@@ -16,6 +16,8 @@ from bot.handlers.start import router as start_router
 from bot.handlers.wardrobe import router as wardrobe_router
 from bot.handlers.menu import router as menu_router
 from bot.handlers.preferences import router as prefs_router
+from bot.handlers.season_mailing import router as season_router
+from bot.handlers.build_outfit import router as outfit_router
 
 
 async def main():
@@ -34,6 +36,8 @@ async def main():
     dp.include_router(wardrobe_router)
     dp.include_router(menu_router)
     dp.include_router(prefs_router)
+    dp.include_router(season_router)
+    dp.include_router(outfit_router)
 
     await dp.start_polling(bot, container=container)  # type: ignore
 

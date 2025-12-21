@@ -1,8 +1,9 @@
-from typing import List, Tuple
+from typing import List, Tuple, Callable, Awaitable, Optional
 from PIL import Image
 from domain.models.outfit import Outfit
 from rembg import remove  # type: ignore
 import io
+from io import BytesIO
 
 
 class OutfitImageRenderer:
@@ -19,17 +20,43 @@ class OutfitImageRenderer:
         self.canvas_bg_color = (255, 255, 255)  # белый цвет фона
         pass
 
-    def render_outfit(self, outfit: Outfit) -> Image.Image:
+    async def render_outfit(
+        self,
+        outfit: Outfit,
+        load_image: Callable[[str], Awaitable[Optional[Image.Image]]],
+        canvas_size: Tuple[int, int] = (1000, 1000),
+        layout: str = "grid",
+    ) -> bytes:
         """
         Построить картинку аутфита по доменной модели.
+
+        load_image(image_id) -> PIL.Image или None
         """
-        width, height = 800, 800
-        canvas = Image.new("RGB", (width, height), color="white")
-        # TODO:
-        # 1. по outfit.items достать картинки вещей
-        # 2. убрать фон
-        # 3. разложить на canvas
-        return canvas
+        images: List[Image.Image] = []
+
+        for item in outfit.items:
+            img = await load_image(item.image_id)
+            if img is None:
+                continue
+            images.append(img)
+
+        if not images:
+            img = Image.new("RGB", canvas_size, color=self.canvas_bg_color)
+            buf = BytesIO()
+            img.save(buf, format="PNG")
+            buf.seek(0)
+            return buf.getvalue()
+
+        img = self.render_from_images(
+            images=images,
+            canvas_size=canvas_size,
+            bg_color=self.canvas_bg_color,
+            layout=layout,
+        )
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        buf.seek(0)
+        return buf.getvalue()
 
     def render_from_images(
         self,

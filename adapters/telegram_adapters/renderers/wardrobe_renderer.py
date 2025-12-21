@@ -19,6 +19,19 @@ def item_summary(data: dict[Any, Any]) -> str:
         f"• Фото: {'есть' if data.get('image_id') else 'нет'}")
 
 
+def item_summary_domain(item: ClothingItem) -> str:
+    # аккуратно, чтобы не падать если чего-то нет
+    return (
+        f"• Название: {item.name}\n"
+        f"• Категория: {item.category}\n"
+        f"• Подтип: {item.subtype}\n"
+        f"• Цвет: {item.main_color}\n"
+        f"• Стиль: {item.style}\n"
+        f"• Теплота: {item.warmth_level}\n"
+        f"• Водозащита: {'✅' if item.is_waterproof else '❌'}\n"
+        f"• Ветрозащита: {'✅' if item.is_windproof else '❌'}\n")
+
+
 class ManageWardrobeRenderer:
     """
     Рендерит результат управления гардеробом:
