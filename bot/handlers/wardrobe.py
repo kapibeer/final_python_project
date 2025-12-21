@@ -11,10 +11,13 @@ from commands.manage_wardrobe import ManageWardrobe, ManageWardrobeResult
 from adapters.telegram_adapters.renderers.wardrobe_renderer \
     import ManageWardrobeRenderer, item_summary, item_summary_domain
 from adapters.telegram_adapters.renderers.types import RenderButton
+from adapters.data_adapters.outfit_image_renderer import OutfitImageRenderer
+from bot.helpers.load_tg_image import LoaderTgImage
 from infra.container import Container
 from bot.keyboards.keyboard_helper import kb, text_kb
 from bot.keyboards import wardrobe_keyboards
 from aiogram.types import ReplyKeyboardRemove
+from aiogram.types import BufferedInputFile
 
 from typing import Union
 
@@ -378,7 +381,8 @@ async def item_windproof(cb: CallbackQuery, state: FSMContext):
 
 @router.message(
     ClothingItemSetup.image_id,
-    F.content_type.in_({ContentType.PHOTO, ContentType.DOCUMENT})
+    F.content_type.in_({ContentType.PHOTO, ContentType.DOCUMENT,
+                        ContentType.STICKER})
 )
 async def item_photo(msg: Message, state: FSMContext):
     """
@@ -395,25 +399,57 @@ async def item_photo(msg: Message, state: FSMContext):
                          "или «Оставить как есть».")
         return
 
-    image_id = None
+    raw_image_id = None
     if msg.photo:
-        image_id = msg.photo[-1].file_id
+        raw_image_id = msg.photo[-1].file_id
     elif msg.document:
-        image_id = msg.document.file_id
+        raw_image_id = msg.document.file_id
 
-    if not image_id:
+    if not raw_image_id:
         await msg.answer("Не вижу фото/файл 😶 Попробуй ещё раз.")
         return
 
-    await state.update_data(image_id=image_id, awaiting_new_image=False)
+    loader = LoaderTgImage(msg.bot)
+    image_renderer = OutfitImageRenderer()
+    image_bytes, success = \
+        await image_renderer.delete_background(image_id=raw_image_id,
+                                               load_image=loader.load_tg_image)
+
+    uploaded = await msg.answer_photo(
+        photo=BufferedInputFile(image_bytes, filename="item.png"),
+        caption="✅ Фон удалён! Сохраняем…",
+    )
+
+    processed_image_id: str | None = None
+    if uploaded.photo:
+        processed_image_id = uploaded.photo[-1].file_id
+
+    if not processed_image_id or not success:
+        await msg.answer("Не получилось сохранить обработанное изображение 😔."
+                         " Отправь другой файл")
+        return
+
+    try:
+        if msg.bot is None:
+            return
+        await msg.bot.delete_message(chat_id=msg.chat.id,
+                                     message_id=uploaded.message_id)
+    except Exception:
+        pass
+
+    await state.update_data(
+        image_id=processed_image_id,
+        awaiting_new_image=False,
+    )
     await state.set_state(ClothingItemSetup.confirm)
 
     data = await state.get_data()
     confirm_cb = "wardrobe:add:confirm" if mode == "add" \
         else "wardrobe:edit:confirm"
 
-    await msg.answer(
-        item_summary(data),
+    await msg.answer_photo(
+        photo=processed_image_id,
+        caption=item_summary(data),
         reply_markup=kb([[
             RenderButton("✅ Сохранить", confirm_cb),
             RenderButton("❌ Отмена", "wardrobe:add:cancel"),

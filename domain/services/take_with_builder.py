@@ -34,6 +34,7 @@ class TakeWithBuilder:
         rec = TakeWith(items=[])
         for rule in self.rules:
             rule(weather, rec)
+
         return rec
 
     def _apply_sunny_hot_rules(self, weather: WeatherSnap, rec: TakeWith):
@@ -94,6 +95,8 @@ class TakeWithBuilder:
         day_temp = weather.temperatures.day
         evening_temp = weather.temperatures.evening
         avg = (morning_temp + day_temp + evening_temp) / 3
+        if "легкая непромокаемая куртка" in rec.items:
+            return
         if season in ["spring", "summer", "autumn"] or avg >= 10:
             morning_temp = weather.temperatures.morning
             day_temp = weather.temperatures.day

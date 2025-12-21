@@ -47,22 +47,9 @@ class OutfitImageRenderer:
         if not images:
             return self._empty_png(canvas_size)
 
-        processed = await asyncio.gather(*[
-            asyncio.get_running_loop().run_in_executor(
-                self._pool,
-                self._prepare_image_sync,
-                img,
-            )
-            for img in images
-        ])
-
-        processed = [p for p in processed if p is not None]
-        if not processed:
-            return self._empty_png(canvas_size)
-
         canvas = Image.new("RGB", canvas_size, color=self.canvas_bg_color)
         if layout == "grid":
-            canvas = self._layout_grid(canvas, processed)
+            canvas = self._layout_grid(canvas, images)
 
         buf = BytesIO()
         canvas.save(buf, format="PNG")
@@ -88,8 +75,34 @@ class OutfitImageRenderer:
                                      session=self._session)
         return Image.open(BytesIO(output_bytes)).convert("RGBA")
 
-    # ---------- helpers ----------
+    async def delete_background(
+        self,
+        image_id: str,
+        load_image: Callable[[str], Awaitable[Optional[Image.Image]]],
+    ) -> tuple[bytes, bool]:
+        try:
+            img = await load_image(image_id)
+        except Exception:
+            return self._empty_png(self.default_item_size), False
 
+        if img is None:
+            return self._empty_png(self.default_item_size), False
+
+        loop = asyncio.get_running_loop()
+        processed = await loop.run_in_executor(
+            self._pool,
+            self._prepare_image_sync,
+            img,
+        )
+
+        if processed is None:
+            return self._empty_png(self.default_item_size), False
+
+        buf = BytesIO()
+        processed.save(buf, format="PNG")
+        return buf.getvalue(), True
+
+    # ---------- helpers ----------
     def _empty_png(self, canvas_size: Tuple[int, int]) -> bytes:
         img = Image.new("RGB", canvas_size, color=self.canvas_bg_color)
         buf = BytesIO()

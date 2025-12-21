@@ -23,7 +23,9 @@ WardrobeKeyboard = kb([
 
 CategoryKeyboard = kb([
     [
-        RenderButton("🧥 Верхняя одежда", "item:cat:outerwear"),
+        RenderButton("🧥 Верхняя одежда", "item:cat:outerwear")
+    ],
+    [
         RenderButton("👕 Верх", "item:cat:top"),
         RenderButton("👖 Низ", "item:cat:bottom"),
     ],
