@@ -28,7 +28,8 @@ async def main():
     engine = make_engine()
     session_factory = make_session_factory(engine)
 
-    Base.metadata.create_all(bind=engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
     container = Container(session_factory=session_factory)
 

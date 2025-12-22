@@ -21,7 +21,8 @@ async def daily_tick(bot: Bot, container: Container) -> None:
     start_t, end_t = _time_window_last_minute(now)
 
     user_repo = container.user_repo()
-    users = user_repo.get_users_to_notify_between(start=start_t, end=end_t)
+    users = await user_repo.get_users_to_notify_between(start=start_t,
+                                                        end=end_t)
 
     for u in users:
         if not u.notifications_enabled:

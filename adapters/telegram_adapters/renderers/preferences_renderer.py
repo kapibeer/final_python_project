@@ -3,6 +3,7 @@ from domain.models.user import User
 from commands.manage_user_preferences import ManageUserPreferencesResult
 from .types import RenderMessage, RenderButton
 from dataclasses import dataclass
+import adapters.telegram_adapters.renderers.translates as translates
 
 
 @dataclass(frozen=True)
@@ -54,7 +55,6 @@ class ManageUserPreferencesRenderer:
 
     def render_user_summary(self, user: User) -> str:
         lines: List[str] = []
-
         lines.append(f"• Ник: {user.username}")
         lines.append(f"• Пол: {'👩' if user.gender == 'female' else '👨'}")
         lines.append(f"• Возраст: {user.age}")
@@ -62,12 +62,14 @@ class ManageUserPreferencesRenderer:
 
         # cold sensitivity
         lines.append(
-                f"• Мерзлявость: {user.cold_sensitivity.value}"
+            "• Мерзлявость: "
+            f"{translates.COLD_TRANSLATE [user.cold_sensitivity.value]}"
             )
 
         # favourite style
         lines.append(
-                f"• Любимый стиль: {user.favourite_style.value}"
+                "• Любимый стиль: "
+                f"{translates.STYLE_TRANSLATE[user.favourite_style.value]}"
         )
 
         # notification time

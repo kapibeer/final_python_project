@@ -26,14 +26,14 @@ class SeasonMailing:
         self._user_repo = user_repo
         self._weather_repo = weather_repo
 
-    def run(self) -> List[SeasonMailResult]:
+    async def run(self) -> List[SeasonMailResult]:
         results: List[SeasonMailResult] = []
 
         # текущая дата для запросов в погодный репозиторий
         today = date.today()
 
         # Берём всех пользователей, у кого включены сезонные уведомления
-        users: List[User] = self._user_repo.\
+        users: List[User] = await self._user_repo.\
             get_all_users_with_seasonal_notifications()
 
         for user in users:
@@ -60,6 +60,6 @@ class SeasonMailing:
 
                 # Обновляем пользователя
                 user.last_season_notifiied = current_season
-                self._user_repo.update(user)
+                await self._user_repo.update(user)
 
         return results

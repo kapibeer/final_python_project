@@ -21,8 +21,8 @@ router = Router()
 
 async def send_daily_to_user(bot: Bot, container: Container, user_id: int):
     daily_rec: DailyRecommendation = container.daily_recommendation()
-    result: DailyRecommendationResult = daily_rec.run(user_id=user_id,
-                                                      today=date.today())
+    result: DailyRecommendationResult = await daily_rec.run(user_id=user_id,
+                                                            today=date.today())
 
     renderer = DailyRecommendationRenderer()
     rendered: RenderMessage = renderer.render(result=result)

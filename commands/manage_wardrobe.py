@@ -23,18 +23,18 @@ class ManageWardrobe:
     def __init__(self, wardrobe_repo: WardrobeRepository):
         self._wardrobe_repo = wardrobe_repo
 
-    def add_item(self, user_id: int, item: ClothingItem)\
+    async def add_item(self, user_id: int, item: ClothingItem)\
             -> ManageWardrobeResult:
-        self._wardrobe_repo.add_item(user_id, item)
+        await self._wardrobe_repo.add_item(user_id, item)
         return ManageWardrobeResult(
             success=True,
             message_key="added",
             item=item
         )
 
-    def update_item(self, user_id: int, item_id: int, **updates: Any)\
+    async def update_item(self, user_id: int, item_id: int, **updates: Any)\
             -> ManageWardrobeResult:
-        existing = self._wardrobe_repo.get_item(user_id, item_id)
+        existing = await self._wardrobe_repo.get_item(user_id, item_id)
         if existing is None:
             return ManageWardrobeResult(success=False, message_key="not_found")
 
@@ -43,17 +43,18 @@ class ManageWardrobe:
             if hasattr(existing, key):
                 setattr(existing, key, value)
 
-        self._wardrobe_repo.update_item(user_id, existing)
+        await self._wardrobe_repo.update_item(user_id, existing)
         return ManageWardrobeResult(success=True,
                                     message_key="updated",
                                     item=existing)
 
-    def delete_item(self, user_id: int, item_id: int) -> ManageWardrobeResult:
-        existing = self._wardrobe_repo.get_item(user_id, item_id)
+    async def delete_item(self, user_id: int, item_id: int) \
+            -> ManageWardrobeResult:
+        existing = await self._wardrobe_repo.get_item(user_id, item_id)
         if existing is None:
             return ManageWardrobeResult(success=False, message_key="not_found")
 
-        self._wardrobe_repo.delete_item(user_id, item_id)
+        await self._wardrobe_repo.delete_item(user_id, item_id)
         return ManageWardrobeResult(
             success=True,
             message_key="deleted"

@@ -46,13 +46,13 @@ class DailyRecommendation:
         self._outfit_builder = outfit_builder
         self._take_with_builder = take_with_builder
 
-    def run(
+    async def run(
         self,
         user_id: int,
         today: date,
     ) -> DailyRecommendationResult:
         # 1. Получаем пользователя
-        user = self._user_repo.get(user_id)
+        user = await self._user_repo.get(user_id)
         if user is None:
             return DailyRecommendationResult(
                 success=False,
@@ -60,7 +60,7 @@ class DailyRecommendation:
             )
 
         # 2. Получаем гардероб
-        wardrobe = self._wardrobe_repo.get_user_wardrobe(user_id)
+        wardrobe = await self._wardrobe_repo.get_user_wardrobe(user_id)
 
         # 3. Получаем погоду
         weather: Optional[WeatherSnap] = self._weather_repo.get_weather(

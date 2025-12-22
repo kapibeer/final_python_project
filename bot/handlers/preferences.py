@@ -42,7 +42,7 @@ async def prefs(cb: CallbackQuery, state: FSMContext, container: Container):
 
     user_repo = container.user_repo()
 
-    user: Optional[User] = user_repo.get(cb.from_user.id)
+    user: Optional[User] = await user_repo.get(cb.from_user.id)
 
     if user is not None:
         renderer = ManageUserPreferencesRenderer()
@@ -85,8 +85,8 @@ async def gender_edit(cb: CallbackQuery, state: FSMContext,
         await state.clear()
         manage_prefs = container.manage_user_preferences()
         result: ManageUserPreferencesResult \
-            = manage_prefs.update_preferences(user_id=cb.from_user.id,
-                                              gender=gender)
+            = await manage_prefs.update_preferences(user_id=cb.from_user.id,
+                                                    gender=gender)
         renderer = ManageUserPreferencesRenderer()
         renderered = renderer.render(result=result)
 
@@ -115,8 +115,8 @@ async def age_edit(msg: Message, state: FSMContext, container: Container):
         await state.clear()
         manage_prefs = container.manage_user_preferences()
         result: ManageUserPreferencesResult \
-            = manage_prefs.update_preferences(user_id=msg.from_user.id,
-                                              age=int(msg.text))
+            = await manage_prefs.update_preferences(user_id=msg.from_user.id,
+                                                    age=int(msg.text))
         renderer = ManageUserPreferencesRenderer()
         renderered = renderer.render(result=result)
 
@@ -131,8 +131,7 @@ async def age_edit(msg: Message, state: FSMContext, container: Container):
 async def location(cb: CallbackQuery, state: FSMContext):
     await state.set_state(Prefs.edit_location)
     if cb.message is not None:
-        await cb.message.answer("В каком ты городе?\n"
-                                "Напиши название на английском")
+        await cb.message.answer("В каком ты городе?")
     await cb.answer()
 
 
@@ -144,14 +143,14 @@ async def location_edit(msg: Message, state: FSMContext, container: Container):
             usercase.get_weather(required_date=date.today(),
                                  city=msg.text.strip())
         if weather is None:
-            await msg.answer("Неверный формат. Попробуй написать по-другому")
+            await msg.answer("Не нашла город. Попробуй написать по-другому")
             return
 
         await state.clear()
         manage_prefs = container.manage_user_preferences()
         result: ManageUserPreferencesResult \
-            = manage_prefs.update_preferences(user_id=msg.from_user.id,
-                                              location=msg.text.strip())
+            = await manage_prefs.update_preferences(user_id=msg.from_user.id,
+                                                    location=msg.text.strip())
         renderer = ManageUserPreferencesRenderer()
         renderered = renderer.render(result=result)
 
@@ -184,8 +183,8 @@ async def notif_time_edit(msg: Message, state: FSMContext,
         await state.clear()
         manage_prefs = container.manage_user_preferences()
         result: ManageUserPreferencesResult \
-            = manage_prefs.update_preferences(user_id=msg.from_user.id,
-                                              notification_time=notif_time)
+            = await manage_prefs.update_preferences(user_id=msg.from_user.id,
+                                                    notification_time=notif_time)  # noqa
         renderer = ManageUserPreferencesRenderer()
         renderered = renderer.render(result=result)
 
@@ -221,7 +220,7 @@ async def cold_edit(cb: CallbackQuery, state: FSMContext,
         await state.clear()
         manage_prefs = container.manage_user_preferences()
         result: ManageUserPreferencesResult \
-            = manage_prefs. \
+            = await manage_prefs. \
             update_preferences(user_id=cb.from_user.id,
                                cold_sensitivity=ColdSensitivity(cold))
         renderer = ManageUserPreferencesRenderer()
@@ -269,8 +268,8 @@ async def style_edit(cb: CallbackQuery, state: FSMContext,
         await state.clear()
         manage_prefs = container.manage_user_preferences()
         result: ManageUserPreferencesResult \
-            = manage_prefs.update_preferences(user_id=cb.from_user.id,
-                                              favourite_style=Style(style))
+            = await manage_prefs.update_preferences(user_id=cb.from_user.id,
+                                                    favourite_style=Style(style))  # noqa
         renderer = ManageUserPreferencesRenderer()
         renderered = renderer.render(result=result)
 
@@ -307,8 +306,8 @@ async def notifications_edit(cb: CallbackQuery, state: FSMContext,
         await state.clear()
         manage_prefs = container.manage_user_preferences()
         result: ManageUserPreferencesResult \
-            = manage_prefs.update_preferences(user_id=cb.from_user.id,
-                                              notifications_enabled=enabled)
+            = await manage_prefs.update_preferences(user_id=cb.from_user.id,
+                                                    notifications_enabled=enabled)  # noqa
         renderer = ManageUserPreferencesRenderer()
         renderered = renderer.render(result=result)
 
@@ -347,7 +346,7 @@ async def season_edit(cb: CallbackQuery, state: FSMContext,
         await state.clear()
         manage_prefs = container.manage_user_preferences()
         result: ManageUserPreferencesResult \
-            = manage_prefs. \
+            = await manage_prefs. \
             update_preferences(user_id=cb.from_user.id,
                                season_notifications_enabled=enabled)
         renderer = ManageUserPreferencesRenderer()

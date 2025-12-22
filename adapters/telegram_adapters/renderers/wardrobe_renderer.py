@@ -2,32 +2,33 @@ from domain.models.clothing_item import ClothingItem
 from commands.manage_wardrobe import ManageWardrobeResult
 from .types import RenderMessage, RenderButton
 from typing import Any
+import adapters.telegram_adapters.renderers.translates as translates
 
 
 def item_summary(data: dict[Any, Any]) -> str:
-    # аккуратно, чтобы не падать если чего-то нет
     return (
         "Проверь, всё ок?\n\n"
         f"• Название: {data.get('name','-')}\n"
-        f"• Категория: {data.get('category','-')}\n"
-        f"• Подтип: {data.get('subtype','-')}\n"
-        f"• Цвет: {data.get('main_color','-')}\n"
-        f"• Стиль: {data.get('style','-')}\n"
-        f"• Теплота: {data.get('warmth_level','-')}\n"
+        f"• Категория: "
+        f"{translates.CATEGORY_TRANSLATE[data.get('category','-')]}\n"
+        f"• Подтип: {translates.SUBTYPE_TRANSLATE[data.get('subtype','-')]}\n"
+        f"• Цвет: {translates.COLOR_TRANSLATE[data.get('main_color','-')]}\n"
+        f"• Стиль: {translates.STYLE_TRANSLATE[data.get('style','-')]}\n"
+        "• Теплота: "
+        f"{translates.WARMTH_TRANSLATE[data.get('warmth_level', '-')]}\n"
         f"• Водозащита: {data.get('is_waterproof', False)}\n"
         f"• Ветрозащита: {data.get('is_windproof', False)}\n"
         f"• Фото: {'есть' if data.get('image_id') else 'нет'}")
 
 
 def item_summary_domain(item: ClothingItem) -> str:
-    # аккуратно, чтобы не падать если чего-то нет
     return (
         f"• Название: {item.name}\n"
-        f"• Категория: {item.category}\n"
-        f"• Подтип: {item.subtype}\n"
-        f"• Цвет: {item.main_color}\n"
-        f"• Стиль: {item.style}\n"
-        f"• Теплота: {item.warmth_level}\n"
+        f"• Категория: {translates.CATEGORY_TRANSLATE[item.category]}\n"
+        f"• Подтип: {translates.SUBTYPE_TRANSLATE[item.subtype]}\n"
+        f"• Цвет: {translates.COLOR_TRANSLATE[item.main_color]}\n"
+        f"• Стиль: {translates.STYLE_TRANSLATE[item.style]}\n"
+        f"• Теплота: {translates.WARMTH_TRANSLATE[item.warmth_level]}\n"
         f"• Водозащита: {'✅' if item.is_waterproof else '❌'}\n"
         f"• Ветрозащита: {'✅' if item.is_windproof else '❌'}\n")
 

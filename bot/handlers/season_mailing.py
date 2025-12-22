@@ -10,7 +10,7 @@ async def run_season_mailing(bot: Bot, container: Container) \
     usecase: SeasonMailing = container.season_mailing()
     renderer = SeasonMailingRenderer()
 
-    results = usecase.run()
+    results = await usecase.run()
     sent = 0
     failed = 0
 

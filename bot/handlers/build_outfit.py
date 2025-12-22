@@ -38,7 +38,7 @@ def _build_intro_text() -> str:
     return (
         "<b>Давай подберем тебе аутфит!</b> ✨\n\n"
         "Если хочешь поменять дату, стиль или город — нажми кнопку ниже 🌸\n\n"
-        "<blockquote>учти: мы не можем спрогнозировать"
+        "<blockquote>Учти: мы не можем спрогнозировать"
         " погоду дальше чем на две недели!</blockquote>"
     )
 
@@ -49,7 +49,7 @@ async def outfit_build(cb: CallbackQuery, state: FSMContext,
     await state.clear()
 
     user_repo = container.user_repo()
-    user: Optional[User] = user_repo.get(cb.from_user.id)
+    user: Optional[User] = await user_repo.get(cb.from_user.id)
 
     if user is None:
         if cb.message is not None:
@@ -80,7 +80,7 @@ async def outfit_build(cb: CallbackQuery, state: FSMContext,
 async def outfit_edit_location(cb: CallbackQuery, state: FSMContext):
     await state.set_state(OutfitBuild.outfit_location)
     if cb.message is not None:
-        await cb.message.answer("Напиши город (на английском)")
+        await cb.message.answer("Напиши город")
     await cb.answer()
 
 
@@ -91,7 +91,6 @@ async def outfit_location_msg(msg: Message, state: FSMContext,
     if not city:
         await msg.answer("Город пустой 😶. Напиши нормальное название.")
         return
-
     weather_repo = container.weather_repo()
     weather: Optional[WeatherSnap] = \
         weather_repo.get_weather(required_date=date.today(), city=city)
@@ -218,7 +217,7 @@ async def outfit_gen(cb: CallbackQuery, state: FSMContext,
     date_raw = str(data.get("outfit_date") or "").strip()
 
     if not city or not date_raw:
-        user = container.user_repo().get(cb.from_user.id)
+        user = await container.user_repo().get(cb.from_user.id)
         if user is None:
             if cb.message is not None:
                 await cb.message.answer("Не нашёл профиль 😶 /start")
@@ -253,13 +252,15 @@ async def outfit_gen(cb: CallbackQuery, state: FSMContext,
 
     build_outfit = container.build_outfit()
 
-    result: BuildOutfitResult = build_outfit.run(user_id=cb.from_user.id,
-                                                 today=target_date, city=city,
-                                                 style=style, count_max=5)
+    result: BuildOutfitResult = await build_outfit.run(user_id=cb.from_user.id,
+                                                       today=target_date,
+                                                       city=city,
+                                                       style=style,
+                                                       count_max=5)
     await state.update_data(outfit_result=result)
     renderer = OutfitBuildRenderer()
     rendered = renderer.render(result=result, index=0)
-    if result.outfits is not None:
+    if result.outfits:
         outfit: Outfit = result.outfits[0]
         image_renderer = OutfitImageRenderer()
         loader = LoaderTgImage(bot=cb.bot)
@@ -294,7 +295,7 @@ async def outfit_next(cb: CallbackQuery, state: FSMContext,
         or BuildOutfitResult(success=False, message_key="")
     renderer = OutfitBuildRenderer()
     rendered = renderer.render(result=result, index=indx)
-    if result.outfits is not None:
+    if result.outfits:
         outfit: Outfit = result.outfits[indx]
         image_renderer = OutfitImageRenderer()
         loader = LoaderTgImage(bot=cb.bot)
@@ -320,7 +321,6 @@ async def outfit_next(cb: CallbackQuery, state: FSMContext,
 # LIKE
 @router.callback_query(F.data == "outfit:like")
 async def menu(cb: CallbackQuery, state: FSMContext):
-    await state.clear()
     data = await state.get_data()
     style: Style = data.get("target_style") or Style.CASUAL
     if cb.message is not None:

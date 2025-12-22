@@ -126,29 +126,29 @@ OuterwearSubtypeKeyboard = kb([
 
 ColorKeyboard = kb([
     [
-        RenderButton("Чёрный", "item:color:black"),
-        RenderButton("Белый", "item:color:white"),
-        RenderButton("Серый", "item:color:grey"),
+        RenderButton("Чёрный ☕️", "item:color:black"),
+        RenderButton("Белый 🥛", "item:color:white"),
+        RenderButton("Серый 🪨", "item:color:grey"),
     ],
     [
-        RenderButton("Бежевый", "item:color:beige"),
-        RenderButton("Коричневый", "item:color:brown"),
-        RenderButton("Синий", "item:color:navy"),
+        RenderButton("Бежевый 🍞", "item:color:beige"),
+        RenderButton("Коричневый 🍩", "item:color:brown"),
+        RenderButton("Тёмно-синий 🫐", "item:color:navy"),
     ],
     [
-        RenderButton("Красный", "item:color:red"),
-        RenderButton("Зелёный", "item:color:green"),
-        RenderButton("Фиолетовый", "item:color:purple"),
+        RenderButton("Красный 🍓", "item:color:red"),
+        RenderButton("Зелёный 🥑", "item:color:green"),
+        RenderButton("Фиолетовый 🍆", "item:color:purple"),
     ],
     [
-        RenderButton("Желтый", "item:color:yellow"),
-        RenderButton("Голубой", "item:color:blue"),
-        RenderButton("Оранжевый", "item:color:orange"),
+        RenderButton("Жёлтый 🍌", "item:color:yellow"),
+        RenderButton("Голубой 🧊", "item:color:blue"),
+        RenderButton("Оранжевый 🍊", "item:color:orange"),
     ],
     [
-        RenderButton("Розовый", "item:color:pink"),
-        RenderButton("Хаки", "item:color:khaki"),
-        RenderButton("Разноцветный", "item:color:multicolor"),
+        RenderButton("Розовый 🍧", "item:color:pink"),
+        RenderButton("Хаки 🫑", "item:color:khaki"),
+        RenderButton("Разноцветный 🍭", "item:color:multicolor"),
     ],
     [
         RenderButton("❌ Отмена", "wardrobe:add:cancel"),
@@ -225,10 +225,10 @@ ConfirmKeyboard = kb([
 ])
 
 
-def UserItemsKeyboard(user_id: int, wardrobe_repo: WardrobeRepository,
-                      action: str) -> InlineKeyboardMarkup:
+async def UserItemsKeyboard(user_id: int, wardrobe_repo: WardrobeRepository,
+                            action: str) -> InlineKeyboardMarkup:
     wardrobe: List[ClothingItem] = \
-        wardrobe_repo.get_user_wardrobe(user_id=user_id)
+        await wardrobe_repo.get_user_wardrobe(user_id=user_id)
     buttons: List[List[RenderButton]] = []
     for item in wardrobe:
         buttons.append([RenderButton(item.name,

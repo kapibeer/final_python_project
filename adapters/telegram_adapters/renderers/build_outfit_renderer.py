@@ -5,6 +5,8 @@ from commands.build_outfit import BuildOutfitResult
 from .types import RenderMessage, RenderButton
 from dataclasses import dataclass
 import random
+import adapters.telegram_adapters.renderers.translates as translates
+from adapters.data_adapters.translator import translate
 
 
 OUTFIT_LIKED_WISHES_BY_STYLE = {
@@ -141,6 +143,7 @@ class OutfitBuildRenderer:
             buttons=[
                 [RenderButton("🔁 Сгенерировать ещё",
                               "outfit:gen")],
+                [RenderButton("👍 Нравится", "outfit:like")],
                 [RenderButton("➕ Добавить вещь", "wardrobe:add")],
                 [RenderButton("🏠 Меню", "menu:home")],
             ],
@@ -149,9 +152,13 @@ class OutfitBuildRenderer:
     def _render_header(self, result: BuildOutfitResult) -> str:
         w = result.weather
         st = result.style_used.value if result.style_used else "any"
+        st = result.style_used.value if result.style_used else ""
+        style_tr = "Любой"
+        if st:
+            style_tr = translates.STYLE_TRANSLATE[st]
 
         if not w:
-            return f"Стиль: {st}"
+            return f"Стиль: {style_tr}"
 
         icons: List[str] = []
         if w.is_rain:
@@ -163,6 +170,7 @@ class OutfitBuildRenderer:
         icons_str = (" ".join(icons) + " ") if icons else "❎"
 
         city = w.city
+        city_tr = translate(text=city)
         dt = w.required_date
         date_str = dt.isoformat() if hasattr(dt, "isoformat") else ""
 
@@ -170,21 +178,20 @@ class OutfitBuildRenderer:
         t_d = w.temp_day
         t_e = w.temp_evening
         return (
-            f"<i>{city} • {date_str.replace('-', '.')}</i>\n\n"
+            f"<i>{city_tr} • {date_str.replace('-', '.')}</i>\n\n"
             f"<b>Осадки:</b> {icons_str}\n\n"
             f"<blockquote>"
             f"☀️ <b>Утро:</b> {t_m}°\n"
             f"⛅️ <b>День:</b> {t_d}°\n"
             f"🌙 <b>Вечер:</b> {t_e}°"
             f"</blockquote>\n\n"
-            f"<b>Стиль:</b> {st}"
+            f"<b>Стиль:</b> {style_tr}"
             )
 
     def _render_outfit(self, outfit: Outfit, idx: int, total: int) -> str:
-        lines: List[str] = ["<blockquote>Aутфит для тебя!💋 </blockquote>\n"]
+        lines: List[str] = ["<blockquote>Aутфит для тебя 💋 </blockquote>\n"]
         for item in outfit.items:
             lines.append(
-                f"•<b>{item.name}:</b> "
-                f"{item.style.value} · {item.main_color.value}"
+                f"• <b>{item.name}</b>"
             )
         return "\n".join(lines)

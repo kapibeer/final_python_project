@@ -83,6 +83,11 @@ class TakeWithBuilder:
         if weather.is_fog:
             rec.add("светоотражающие элементы")
 
+    def _apply_sleet_rules(self, weather: WeatherSnap, rec: TakeWith):
+        """Правила если сколько"""
+        if weather.is_fog:
+            rec.add("нескользящая обувь")
+
     def _apply_evening_cooling_rules(self, weather: WeatherSnap,
                                      rec: TakeWith):
         """

@@ -4,7 +4,7 @@ from typing import Optional, List, Callable
 from datetime import time
 
 from sqlalchemy import select, and_
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.models.user import User, ColdSensitivity
 from domain.models.season import Season
@@ -14,7 +14,7 @@ from adapters.database_adapters.models.user_table import UserTable
 
 
 class DBUserRepository(UserRepository):
-    def __init__(self, session_factory: Callable[[], Session]):
+    def __init__(self, session_factory: Callable[[], AsyncSession]):
         self._session_factory = session_factory
 
     # -------------------- mapping --------------------
@@ -57,52 +57,52 @@ class DBUserRepository(UserRepository):
 
     # -------------------- protocol methods --------------------
 
-    def get(self, user_id: int) -> Optional[User]:
-        with self._session_factory() as s:
-            row = s.get(UserTable, user_id)
+    async def get(self, user_id: int) -> Optional[User]:
+        async with self._session_factory() as s:
+            row = await s.get(UserTable, user_id)
             return self._to_domain(row) if row else None
 
-    def create(self, user: User) -> None:
-        with self._session_factory() as s:
-            row = UserTable(user_id=user.user_id)  # PK задаём сами
+    async def create(self, user: User) -> None:
+        async with self._session_factory() as s:
+            row = UserTable(user_id=user.user_id)
             self._apply_domain_to_row(row, user)
             s.add(row)
-            s.commit()
+            await s.commit()
 
-    def update(self, user: User) -> None:
-        with self._session_factory() as s:
-            row = s.get(UserTable, user.user_id)
+    async def update(self, user: User) -> None:
+        async with self._session_factory() as s:
+            row = await s.get(UserTable, user.user_id)
             if row is None:
                 return
             self._apply_domain_to_row(row, user)
-            s.commit()
+            await s.commit()
 
-    def delete(self, user_id: int) -> None:
-        with self._session_factory() as s:
-            row = s.get(UserTable, user_id)
+    async def delete(self, user_id: int) -> None:
+        async with self._session_factory() as s:
+            row = await s.get(UserTable, user_id)
             if row is None:
                 return
-            s.delete(row)
-            s.commit()
+            await s.delete(row)
+            await s.commit()
 
-    def get_or_create(self, user: User) -> User:
-        existing = self.get(user.user_id)
+    async def get_or_create(self, user: User) -> User:
+        existing = await self.get(user.user_id)
         if existing is not None:
             return existing
-        self.create(user)
+        await self.create(user)
         return user
 
-    def get_all_users_with_seasonal_notifications(self) -> List[User]:
-        with self._session_factory() as s:
+    async def get_all_users_with_seasonal_notifications(self) -> List[User]:
+        async with self._session_factory() as s:
             stmt = select(UserTable).where(
                 UserTable.season_notifications_enabled.is_(True)
             )
-            rows = s.execute(stmt).scalars().all()
-            return [self._to_domain(r) for r in rows]
+            rows = (await s.execute(stmt)).scalars().all()  # type: ignore
+            return [self._to_domain(r) for r in rows]  # type: ignore
 
-    def get_users_to_notify_between(self, start: time, end: time) \
+    async def get_users_to_notify_between(self, start: time, end: time) \
             -> list[User]:
-        with self._session_factory() as s:
+        async with self._session_factory() as s:
             stmt = select(UserTable).\
                 where(UserTable.notifications_enabled.is_(True))
 
@@ -119,5 +119,5 @@ class DBUserRepository(UserRepository):
                     (UserTable.notification_time <= end)
                 )
 
-            rows = s.execute(stmt).scalars().all()
-            return [self._to_domain(r) for r in rows]
+            rows = (await s.execute(stmt)).scalars().all()  # type: ignore
+            return [self._to_domain(r) for r in rows]  # type: ignore

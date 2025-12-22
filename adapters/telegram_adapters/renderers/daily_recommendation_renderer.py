@@ -5,6 +5,7 @@ from domain.models.outfit import Outfit
 from commands.daily_recommendation import DailyRecommendationResult
 from .types import RenderMessage, RenderButton
 from dataclasses import dataclass
+import adapters.telegram_adapters.renderers.translates as translates
 
 
 @dataclass(frozen=True)
@@ -26,6 +27,16 @@ class DailyRecommendationRenderer:
         "Пусть будет время и на дела, и на себя 🫶",
         "Сегодня — день маленьких побед 🏆",
         "Пусть настроение держится крепко весь день 🌈",
+        "Пусть сегодня всё получается чуть легче, чем обычно 💫",
+        "Пусть день принесёт что-то приятное и неожиданное ✨",
+        "Пусть будет больше улыбок, чем поводов для тревог 🙂",
+        "Желаю мягкого ритма и хорошего самочувствия 🌸",
+        "Пусть даже обычные вещи радуют сегодня 🤍",
+        "Пусть день сложится в красивую историю 📖✨",
+        "Пусть сегодня будет повод собой гордиться 💪",
+        "Пусть мысли будут ясными, а решения — простыми ☁️",
+        "Пусть будет комфортно — и в одежде, и в настроении 🧥💭",
+        "Пусть день оставит приятное послевкусие 🍃",
     ]
 
     TAKE_WITH_TEXT: ClassVar[dict[str, str]] = {
@@ -57,12 +68,15 @@ class DailyRecommendationRenderer:
             "🧤 <b>Перчатки или варежки</b> — руки скажут спасибо",
 
         "легкая непромокаемая куртка":
-            "🧥 <b>Непромокаемая куртка</b> — <i>идеальна для влажной"
-            " и сырой погоды</i>",
+            "🧥 <b>Непромокаемая куртка</b> — идеальна для влажной"
+            " и сырой погоды",
 
         "светоотражающие элементы":
             "✨ <b>Светоотражающие элементы</b> — сегодня туманно,"
             " так заметнее и безопаснее",
+
+        "нескользящая обувь": "🧊 <b>Нескользящая обувь</b> — "
+        "сегодня скользко, аккуратно!",
 
         "легкая куртка":
             "🧥 <b>Лёгкая куртка</b> — вечером станет прохладнее",
@@ -125,10 +139,13 @@ class DailyRecommendationRenderer:
 
     def _render_header(self, result: DailyRecommendationResult) -> str:
         w = result.weather
-        st = result.style_used.value if result.style_used else "any"
+        st = result.style_used.value if result.style_used else ""
+        style_tr = "Любой"
+        if st:
+            style_tr = translates.STYLE_TRANSLATE[st]
 
         if not w:
-            return f"ЕЖЕДНЕВНАЯ РЕКОМЕНДАЦИЯ\nСтиль: {st}"
+            return f"ЕЖЕДНЕВНАЯ РЕКОМЕНДАЦИЯ\nСтиль: {style_tr}"
 
         icons: List[str] = []
         if getattr(w, "is_rain", False):
@@ -137,7 +154,7 @@ class DailyRecommendationRenderer:
             icons.append("❄️")
         if getattr(w, "is_windy", False):
             icons.append("💨")
-        icons_str = (" ".join(icons) + " ") if icons else ""
+        icons_str = (" ".join(icons) + " ") if icons else "❎"
 
         city = w.city
         dt = w.required_date
@@ -155,7 +172,7 @@ class DailyRecommendationRenderer:
             f"⛅️ <b>День:</b> {t_d}°\n"
             f"🌙 <b>Вечер:</b> {t_e}°"
             f"</blockquote>\n\n"
-            f"<b>Стиль:</b> {st}"
+            f"<b>Стиль:</b> {style_tr}"
             )
 
     def _render_wish(self) -> str:
@@ -178,10 +195,9 @@ class DailyRecommendationRenderer:
         if outfit is None:
             return ""
 
-        lines: List[str] = ["<blockquote>Aутфит для тебя!💋 </blockquote>\n"]
+        lines: List[str] = ["<blockquote>Aутфит для тебя 💋 </blockquote>\n"]
         for item in outfit.items:
             lines.append(
-                f"•<b>{item.name}:</b> "
-                f"{item.style.value} · {item.main_color.value}"
+                f"• <b>{item.name}</b>"
             )
         return "\n".join(lines)

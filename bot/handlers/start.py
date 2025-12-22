@@ -1,4 +1,5 @@
 from datetime import time, date
+from typing import Optional
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.state import StatesGroup, State
@@ -7,11 +8,12 @@ from aiogram.fsm.context import FSMContext
 from domain.models.user import ColdSensitivity, User
 from domain.models.weather_snap import WeatherSnap
 from domain.models.clothing_item import Style
-from adapters.telegram_adapters.renderers.types import RenderButton
-from infra.container import Container
-from bot.keyboards.keyboard_helper import kb
 
-from typing import Optional
+from adapters.telegram_adapters.renderers.types import RenderButton
+
+from infra.container import Container
+
+from bot.keyboards.keyboard_helper import kb
 
 
 router = Router()
@@ -35,7 +37,7 @@ async def start(msg: Message, state: FSMContext, container: Container):
     user_repo = container.user_repo()
 
     if msg.from_user is not None:
-        user: Optional[User] = user_repo.get(msg.from_user.id)
+        user: Optional[User] = await user_repo.get(msg.from_user.id)
 
         if user is not None:
             await msg.answer(
@@ -93,7 +95,7 @@ async def age_start(msg: Message, state: FSMContext):
 
         await state.update_data(age=int(msg.text))
         await state.set_state(PrefsSetup.location)
-        await msg.answer("В каком ты городе? Напиши название на английском")
+        await msg.answer("В каком ты городе?")
 
 
 # LOCATION
@@ -106,7 +108,8 @@ async def location_start(msg: Message, state: FSMContext,
             usercase.get_weather(required_date=date.today(),
                                  city=msg.text.strip())
         if weather is None:
-            await msg.answer("Неверный формат. Попробуй написать по-другому")
+            await msg.answer("Не получается определить город.\n"
+                             "Попробуй написать по-другому")
             return
 
         await state.update_data(location=msg.text.strip())
@@ -228,9 +231,9 @@ async def notification_time_start(msg: Message,
 
         repo = container.user_repo()
         if msg.from_user is not None:
-            existing = repo.get(msg.from_user.id)
+            existing = await repo.get(msg.from_user.id)
             if existing is None:
-                repo.create(User(
+                await repo.create(User(
                     user_id=msg.from_user.id,
                     username=msg.from_user.username or "",
                     gender=data["gender"],
@@ -255,7 +258,7 @@ async def notification_time_start(msg: Message,
                 existing.season_notifications_enabled = \
                     data["season_notifications_enabled"]
                 existing.notification_time = notif_time
-                repo.update(existing)
+                await repo.update(existing)
 
             await state.clear()
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional, List, Callable
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.models.clothing_item import (
     ClothingItem,
@@ -18,7 +18,7 @@ from adapters.database_adapters.models.wardrobe_table import WardrobeTable
 
 
 class DBWardrobeRepository(WardrobeRepository):
-    def __init__(self, session_factory: Callable[[], Session]):
+    def __init__(self, session_factory: Callable[[], AsyncSession]):
         self._session_factory = session_factory
 
     # -------------------- mapping --------------------
@@ -35,8 +35,8 @@ class DBWardrobeRepository(WardrobeRepository):
             style=Style(row.style),
             warmth_level=WarmthLevel(row.warmth_level),
             subtype=ClothingSubtype(row.subtype),
-            is_waterproof=row.is_waterproof,
-            is_windproof=row.is_windproof,
+            is_waterproof=row.is_waterproof,  # type: ignore
+            is_windproof=row.is_windproof,  # type: ignore
         )
         # top_group выставится сам в __post_init__
 
@@ -57,52 +57,53 @@ class DBWardrobeRepository(WardrobeRepository):
 
     # -------------------- protocol methods --------------------
 
-    def get_user_wardrobe(self, user_id: int) -> List[ClothingItem]:
-        with self._session_factory() as s:
+    async def get_user_wardrobe(self, user_id: int) -> List[ClothingItem]:
+        async with self._session_factory() as s:
             stmt = select(WardrobeTable). \
                 where(WardrobeTable.owner_id == user_id)
-            rows = s.execute(stmt).scalars().all()
-            return [self._to_domain(r) for r in rows]
+            rows = (await s.execute(stmt)).scalars().all()  # type: ignore
+            return [self._to_domain(r) for r in rows]  # type: ignore
 
-    def get_item(self, user_id: int, item_id: int) -> Optional[ClothingItem]:
-        with self._session_factory() as s:
+    async def get_item(self, user_id: int, item_id: int) \
+            -> Optional[ClothingItem]:
+        async with self._session_factory() as s:
             stmt = select(WardrobeTable).where(
                 WardrobeTable.item_id == item_id,
                 WardrobeTable.owner_id == user_id,
             )
-            row = s.execute(stmt).scalars().first()
-            return self._to_domain(row) if row else None
+            row = (await s.execute(stmt)).scalars().first()  # type: ignore
+            return self._to_domain(row) if row else None  # type: ignore
 
-    def add_item(self, user_id: int, item: ClothingItem) -> int:
-        with self._session_factory() as s:
+    async def add_item(self, user_id: int, item: ClothingItem) -> int:
+        async with self._session_factory() as s:
             row = WardrobeTable(owner_id=user_id)
             self._apply_domain_to_row(row, item)
 
-            s.add(row)
-            s.commit()
-            s.refresh(row)
+            await s.add(row)  # type: ignore
+            await s.commit()
+            await s.refresh(row)
 
             return row.item_id
 
-    def update_item(self, user_id: int, item: ClothingItem) -> None:
+    async def update_item(self, user_id: int, item: ClothingItem) -> None:
         # защищаемся, чтобы нельзя было обновить чужую вещь
-        with self._session_factory() as s:
+        async with self._session_factory() as s:
             row = s.get(WardrobeTable, item.item_id)
-            if row is None or row.owner_id != user_id:
+            if row is None or row.owner_id != user_id:  # type: ignore
                 return
 
-            self._apply_domain_to_row(row, item)
-            s.commit()
+            self._apply_domain_to_row(row, item)  # type: ignore
+            await s.commit()
 
-    def delete_item(self, user_id: int, item_id: int) -> None:
-        with self._session_factory() as s:
+    async def delete_item(self, user_id: int, item_id: int) -> None:
+        async with self._session_factory() as s:
             stmt = select(WardrobeTable).where(
                 WardrobeTable.item_id == item_id,
                 WardrobeTable.owner_id == user_id,
             )
-            row = s.execute(stmt).scalars().first()
+            row = (await s.execute(stmt)).scalars().first()  # type: ignore
             if row is None:
                 return
 
-            s.delete(row)
-            s.commit()
+            await s.delete(row)  # type: ignore
+            await s.commit()

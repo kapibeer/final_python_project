@@ -51,7 +51,7 @@ async def wardrobe_open(cb: CallbackQuery, state: FSMContext,
 
     user_repo = container.user_repo()
 
-    user = user_repo.get(cb.from_user.id)
+    user = await user_repo.get(cb.from_user.id)
 
     if user is not None:
         if cb.message is not None:
@@ -77,7 +77,7 @@ async def wardrobe_watch(cb: CallbackQuery, state: FSMContext,
     wardrobe_repo = container.wardrobe_repo()
     if cb.message is not None:
         await cb.message.answer(text="Твои вещи 🌺",
-                                reply_markup=wardrobe_keyboards.
+                                reply_markup=await wardrobe_keyboards.
                                 UserItemsKeyboard(user_id=cb.from_user.id,
                                                   action="watch",
                                                   wardrobe_repo=wardrobe_repo))
@@ -90,7 +90,7 @@ async def item_watch(cb: CallbackQuery, state: FSMContext,
     if cb.data is not None:
         item_id = int(cb.data.split(":")[-1])
         repo = container.wardrobe_repo()
-        item = repo.get_item(user_id=cb.from_user.id, item_id=item_id)
+        item = await repo.get_item(user_id=cb.from_user.id, item_id=item_id)
         if item is not None and cb.message is not None:
             summary = item_summary_domain(item)
             keyboard = kb([[RenderButton("✏️ Изменить вещь",
@@ -128,7 +128,7 @@ async def wardrobe_update(cb: CallbackQuery, state: FSMContext,
     if cb.message is not None:
         await cb.message.answer(
             "Какую вещь хочешь изменить?",
-            reply_markup=wardrobe_keyboards.UserItemsKeyboard(
+            reply_markup=await wardrobe_keyboards.UserItemsKeyboard(
                 user_id=cb.from_user.id,
                 wardrobe_repo=container.wardrobe_repo(),
                 action="edit")
@@ -143,7 +143,7 @@ async def item_edit(cb: CallbackQuery, state: FSMContext,
         item_id = int(cb.data.split(":")[-1])
 
         repo = container.wardrobe_repo()
-        item = repo.get_item(user_id=cb.from_user.id, item_id=item_id)
+        item = await repo.get_item(user_id=cb.from_user.id, item_id=item_id)
 
         if not item:
             if cb.message is not None:
@@ -406,7 +406,7 @@ async def item_photo(msg: Message, state: FSMContext):
         raw_image_id = msg.document.file_id
 
     if not raw_image_id:
-        await msg.answer("Не вижу фото/файл 😶 Попробуй ещё раз.")
+        await msg.answer("Не вижу фото/файл 😶\nПопробуй ещё раз.")
         return
 
     loader = LoaderTgImage(msg.bot)
@@ -425,8 +425,8 @@ async def item_photo(msg: Message, state: FSMContext):
         processed_image_id = uploaded.photo[-1].file_id
 
     if not processed_image_id or not success:
-        await msg.answer("Не получилось сохранить обработанное изображение 😔."
-                         " Отправь другой файл")
+        await msg.answer("Не получилось сохранить обработанное изображение 😔\n"
+                         "Отправь другой файл")
         return
 
     try:
@@ -481,7 +481,7 @@ async def item_image_keep(cb: CallbackQuery, state: FSMContext):
     if cb.message is not None:
         if not image_id:
             # на всякий случай
-            await cb.message.answer("Не вижу текущую картинку 😶."
+            await cb.message.answer("Не вижу текущую картинку 😶\n"
                                     "Пришли фото заново.")
             await cb.answer()
             return
@@ -530,21 +530,21 @@ async def item_confirm(cb: CallbackQuery, state: FSMContext,
             is_windproof=bool(data.get("is_windproof")),
         )
     if mode == "add":
-        result = usecase.add_item(user_id=user_id, item=item)
+        result = await usecase.add_item(user_id=user_id, item=item)
     else:
         result: ManageWardrobeResult = \
-            usecase.update_item(user_id=user_id,
-                                item_id=item.item_id, **{
-                                    "name": item.name,
-                                    "image_id": item.image_id,
-                                    "category": item.category,
-                                    "subtype": item.subtype,
-                                    "main_color": item.main_color,
-                                    "style": item.style,
-                                    "warmth_level": item.warmth_level,
-                                    "is_waterproof": item.is_waterproof,
-                                    "is_windproof": item.is_windproof,
-                                    })
+            await usecase.update_item(user_id=user_id,
+                                      item_id=item.item_id, **{
+                                        "name": item.name,
+                                        "image_id": item.image_id,
+                                        "category": item.category,
+                                        "subtype": item.subtype,
+                                        "main_color": item.main_color,
+                                        "style": item.style,
+                                        "warmth_level": item.warmth_level,
+                                        "is_waterproof": item.is_waterproof,
+                                        "is_windproof": item.is_windproof,
+                                        })
     rendered = renderer.render(result)
 
     await state.clear()
@@ -561,7 +561,7 @@ async def delete(cb: CallbackQuery, container: Container):
     if cb.message is not None:
         await cb.message.answer(
             "Какую вещь хочешь удалить?",
-            reply_markup=wardrobe_keyboards.UserItemsKeyboard(
+            reply_markup=await wardrobe_keyboards.UserItemsKeyboard(
                 user_id=cb.from_user.id,
                 wardrobe_repo=container.wardrobe_repo(), action="delete")
         )
@@ -577,7 +577,7 @@ async def delete_item(cb: CallbackQuery, container: Container):
         usecase: ManageWardrobe = container.manage_wardrobe()
         renderer = ManageWardrobeRenderer()
 
-        result = usecase.delete_item(
+        result = await usecase.delete_item(
             user_id=user_id,
             item_id=item_id,
         )

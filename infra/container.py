@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # --- domain protocols ---
 from domain.repositories.user_repository import UserRepository
@@ -38,7 +38,7 @@ class Container:
     """
     DI-контейнер
     """
-    session_factory: Callable[[], Session]
+    session_factory: Callable[[], AsyncSession]
 
     # -------------------- repositories --------------------
 

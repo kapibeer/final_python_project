@@ -20,13 +20,13 @@ class ManageUserPreferences:
     def __init__(self, user_repo: UserRepository):
         self._user_repo = user_repo
 
-    def update_preferences(self, user_id: int, **updates: Any)\
+    async def update_preferences(self, user_id: int, **updates: Any)\
             -> ManageUserPreferencesResult:
         """
         Обновляет только те поля, которые пришли в updates.
         Например: update_preferences(id, age=20, style="casual")
         """
-        user = self._user_repo.get(user_id)
+        user = await self._user_repo.get(user_id)
         if user is None:
             return ManageUserPreferencesResult(
                 success=False,
@@ -38,7 +38,7 @@ class ManageUserPreferences:
             if hasattr(user, key):
                 setattr(user, key, value)
 
-        self._user_repo.update(user)
+        await self._user_repo.update(user)
 
         return ManageUserPreferencesResult(
             success=True,

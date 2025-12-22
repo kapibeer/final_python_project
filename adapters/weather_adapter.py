@@ -3,6 +3,7 @@ from datetime import date
 from typing import Optional, Any
 import requests
 from domain.models.weather_snap import WeatherSnap, TemperaturePeriod
+from adapters.data_adapters.translator import translate
 
 
 class OpenWeatherAdapter(WeatherRepository):
@@ -16,6 +17,7 @@ class OpenWeatherAdapter(WeatherRepository):
 
     def get_weather(self, required_date: date, city: str) \
             -> Optional[WeatherSnap]:
+        city_tr = translate(city, source="ru", target="en")
         today = date.today()
         step_days = (required_date - today).days
 
@@ -24,7 +26,7 @@ class OpenWeatherAdapter(WeatherRepository):
 
         params: dict[Any, Any] = {
             "key": self.api_key,
-            "q": city,
+            "q": city_tr,
             "lang": "en",
             "days": step_days + 1,
             "aqi": "no",
