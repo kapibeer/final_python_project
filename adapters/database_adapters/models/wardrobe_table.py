@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from sqlalchemy import Boolean, ForeignKey, Integer, String
+from sqlalchemy import Boolean, ForeignKey, String, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
@@ -12,11 +12,11 @@ from .base import Base
 class WardrobeTable(Base):
     __tablename__ = "wardrobe_items"
 
-    item_id: Mapped[int] = mapped_column(Integer, primary_key=True,
+    item_id: Mapped[int] = mapped_column(BigInteger, primary_key=True,
                                          autoincrement=True)
 
     owner_id: Mapped[int] = mapped_column(
-        Integer,
+        BigInteger,
         ForeignKey("users.user_id", ondelete="CASCADE"),
         nullable=False,
         index=True,

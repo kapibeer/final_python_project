@@ -79,7 +79,7 @@ class DBWardrobeRepository(WardrobeRepository):
             row = WardrobeTable(owner_id=user_id)
             self._apply_domain_to_row(row, item)
 
-            await s.add(row)  # type: ignore
+            s.add(row)
             await s.commit()
             await s.refresh(row)
 
@@ -88,7 +88,7 @@ class DBWardrobeRepository(WardrobeRepository):
     async def update_item(self, user_id: int, item: ClothingItem) -> None:
         # защищаемся, чтобы нельзя было обновить чужую вещь
         async with self._session_factory() as s:
-            row = s.get(WardrobeTable, item.item_id)
+            row = await s.get(WardrobeTable, item.item_id)
             if row is None or row.owner_id != user_id:  # type: ignore
                 return
 

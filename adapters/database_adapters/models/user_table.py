@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import time
 from typing import Optional
 
-from sqlalchemy import Boolean, Integer, String, Time
+from sqlalchemy import Boolean, Integer, String, Time, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
@@ -12,7 +12,7 @@ from .base import Base
 class UserTable(Base):
     __tablename__ = "users"
 
-    user_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     username: Mapped[str] = mapped_column(String(128), nullable=False)
 
     gender: Mapped[str] = mapped_column(String(32), nullable=False)

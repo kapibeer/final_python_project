@@ -27,13 +27,14 @@ class DBUserRepository(UserRepository):
             gender=row.gender,
             age=row.age,
             location=row.location,
-            cold_sensitivity=ColdSensitivity(row.cold_sensitivity),
+
             notification_time=row.notification_time,
             notifications_enabled=row.notifications_enabled,
             season_notifications_enabled=row.season_notifications_enabled,
             last_season_notifiied=Season(row.last_season_notifiied)
             if row.last_season_notifiied else None,
-            favourite_style=Style(row.favourite_style),
+            cold_sensitivity=ColdSensitivity(row.cold_sensitivity),
+            favourite_style=Style(row.favourite_style)
         )
 
     @staticmethod
