@@ -2,11 +2,14 @@ venv/
 env/
 *.pyc
 __pycache__/
+__pytest_cache__/
+.pytest_cache/
+.idea/
 .ipynb_checkpoints/
 */.ipynb_checkpoints/
 *.DS_Store
-test_outfit_builder.py
-test_image.py
+playground_outfit_builder.py
+playground_image.py
 img1.jpg
 img2.jpg
 img3.jpg
