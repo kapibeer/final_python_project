@@ -100,7 +100,8 @@ class TakeWithBuilder:
         day_temp = weather.temperatures.day
         evening_temp = weather.temperatures.evening
         avg = (morning_temp + day_temp + evening_temp) / 3
-        if "легкая непромокаемая куртка" in rec.items:
+        if "легкая непромокаемая куртка" in rec.items \
+                or "ветровка" in rec.items:
             return
         if season in ["spring", "summer", "autumn"] or avg >= 10:
             morning_temp = weather.temperatures.morning

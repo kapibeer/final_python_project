@@ -2,44 +2,10 @@ import pytest
 from datetime import date
 
 from domain.models.season import Season
-from domain.models.weather_snap import WeatherSnap, TemperaturePeriod
+
 from domain.services.detect_season import detect_season
 
-
-def make_weather(
-    d: date,
-    *,
-    morning: float,
-    day: float,
-    evening: float,
-    is_rain: bool = False,
-    is_snow: bool = False,
-    is_sleet: bool = False,
-    is_storm: bool = False,
-    is_windy: bool = False,
-    is_uv_high: bool = False,
-    is_humid: bool = False,
-    is_sunny: bool = False,
-    is_fog: bool = False,
-    is_cloudy: bool = False,
-    city: str = "TestCity",
-) -> WeatherSnap:
-    temps = TemperaturePeriod(morning=morning, day=day, evening=evening)
-    return WeatherSnap(
-        location=city,
-        required_date=d,
-        temperatures=temps,
-        is_rain=is_rain,
-        is_snow=is_snow,
-        is_sleet=is_sleet,
-        is_storm=is_storm,
-        is_windy=is_windy,
-        is_uv_high=is_uv_high,
-        is_humid=is_humid,
-        is_sunny=is_sunny,
-        is_fog=is_fog,
-        is_cloudy=is_cloudy,
-    )
+from tests.helpers import make_weather
 
 
 @pytest.mark.parametrize(
@@ -52,9 +18,8 @@ def make_weather(
     ],
 )
 def test_detect_season_returns_season_on_exact_start_day(d: date,
-                                                         expected: Season) \
-                                                            -> None:
-    w = make_weather(d, morning=0, day=0, evening=0)  # признаки не важны
+                                                         expected: Season):
+    w = make_weather(d, morning=0, day=0, evening=0)
     assert detect_season(w) == expected
 
 
