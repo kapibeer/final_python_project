@@ -6,7 +6,6 @@ from .types import RenderMessage, RenderButton
 from dataclasses import dataclass
 import random
 import adapters.telegram_adapters.renderers.translates as translates
-from adapters.data_adapters.translator import translate
 
 
 OUTFIT_LIKED_WISHES_BY_STYLE = {
@@ -170,7 +169,6 @@ class OutfitBuildRenderer:
         icons_str = (" ".join(icons) + " ") if icons else "❎"
 
         city = w.city
-        city_tr = translate(text=city)
         dt = w.required_date
         date_str = dt.isoformat() if hasattr(dt, "isoformat") else ""
 
@@ -178,7 +176,7 @@ class OutfitBuildRenderer:
         t_d = w.temp_day
         t_e = w.temp_evening
         return (
-            f"<i>{city_tr} • {date_str.replace('-', '.')}</i>\n\n"
+            f"<i>{city} • {date_str.replace('-', '.')}</i>\n\n"
             f"<b>Осадки:</b> {icons_str}\n\n"
             f"<blockquote>"
             f"☀️ <b>Утро:</b> {t_m}°\n"

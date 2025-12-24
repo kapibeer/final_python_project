@@ -40,11 +40,10 @@ def setup_scheduler(bot: Bot, container: Container) -> AsyncIOScheduler:
                       "interval", minutes=2,
                       args=[bot, container])
 
-    scheduler.add_job(  # type: ignore
-        lambda: run_season_mailing(bot, container),
-        "cron",
-        hour=12,
-        minute=00,
-    )
+    scheduler.add_job(run_season_mailing,  # type: ignore
+                      "cron",
+                      hour=12,
+                      minute=00,
+                      args=[bot, container],)
 
     return scheduler
