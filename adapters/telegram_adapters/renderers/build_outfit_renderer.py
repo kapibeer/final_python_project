@@ -97,6 +97,7 @@ class OutfitBuildRenderer:
             buttons: List[List[RenderButton]] = [
                 [RenderButton("🔁 Сгенерировать ещё",
                               "outfit:gen")],
+                [RenderButton("👍 Нравится", "outfit:like")],
                 [RenderButton("🧥 Гардероб", "wardrobe:open"),
                  RenderButton("🏠 Меню", "menu:home")],
                 [],

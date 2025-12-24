@@ -424,11 +424,6 @@ async def item_photo(msg: Message, state: FSMContext):
     if uploaded.photo:
         processed_image_id = uploaded.photo[-1].file_id
 
-    if not processed_image_id or not success:
-        await msg.answer("Не получилось сохранить обработанное изображение 😔\n"
-                         "Отправь другой файл")
-        return
-
     try:
         if msg.bot is None:
             return
@@ -436,6 +431,11 @@ async def item_photo(msg: Message, state: FSMContext):
                                      message_id=uploaded.message_id)
     except Exception:
         pass
+
+    if not processed_image_id or not success:
+        await msg.answer("Не получилось сохранить обработанное изображение 😔\n"
+                         "Отправь другой файл")
+        return
 
     await state.update_data(
         image_id=processed_image_id,

@@ -47,13 +47,13 @@ class OpenWeatherAdapter(WeatherRepository):
         )
 
         avg_rain = sum(
-            int(h.get("chance_of_rain", 0)) for h in data["hour"]
-        ) / len(data["hour"])
+            int(h.get("chance_of_rain", 0)) for h in data["hour"][7:23]
+        ) / len(data["hour"][7:23])
 
         is_rain = avg_rain >= 50
         avg_snow = sum(
-            int(h.get("chance_of_snow", 0)) for h in data["hour"]
-        ) / len(data["hour"])
+            int(h.get("chance_of_snow", 0)) for h in data["hour"][7:23]
+        ) / len(data["hour"][7:23])
 
         is_snow = (
             avg_snow >= 50
