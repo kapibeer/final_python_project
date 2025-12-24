@@ -8,10 +8,5 @@ __pytest_cache__/
 .ipynb_checkpoints/
 */.ipynb_checkpoints/
 *.DS_Store
-playground_outfit_builder.py
-playground_image.py
-img1.jpg
-img2.jpg
-img3.jpg
 .env
 .coverage
